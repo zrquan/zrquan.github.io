@@ -3,11 +3,23 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/journal/20201228/</loc>
+  </url>
+  
+  <url>
+    <loc>/journal/20210104/</loc>
+  </url>
+  
+  <url>
     <loc>/categories/</loc>
   </url>
   
   <url>
     <loc>/tags/emacs/</loc>
+  </url>
+  
+  <url>
+    <loc>/journal/</loc>
   </url>
   
   <url>
