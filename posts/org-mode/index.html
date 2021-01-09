@@ -55,7 +55,8 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/posts/org-mode/" />
-<meta property="og:site_name" content="zrquan" />
+<meta property="article:published_time" content="2021-01-09T00:00:00+08:00" />
+<meta property="article:modified_time" content="2021-01-09T00:00:00+08:00" /><meta property="og:site_name" content="zrquan" />
 
 
 
@@ -90,10 +91,29 @@
   <ul class="menu__inner menu__inner--desktop">
     
       
-        
-          <li><a href="/about">About</a></li>
-        
       
+        <ul class="menu__sub-inner">
+          <li class="menu__sub-inner-more-trigger">
+            Menu
+            <span class="menu__sub-inner-more-trigger-icon"
+              ><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span
+            >
+          </li>
+          <ul class="menu__sub-inner-more hidden">
+            
+              
+                <li><a href="/archive">Archive</a></li>
+              
+            
+              
+                <li><a href="/journal">Journal</a></li>
+              
+            
+          </ul>
+        </ul>
       
       
   </ul>
@@ -101,7 +121,11 @@
   <ul class="menu__inner menu__inner--mobile">
     
       
-        <li><a href="/about">About</a></li>
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="/journal">Journal</a></li>
       
     
   </ul>
@@ -145,14 +169,18 @@
     <h1 class="post-title">My life in plain text</h1>
     <div class="post-meta">
       
+        <span class="post-date">
+          2021-01-09
+        </span>
+
+        
+          
+        
+      
 
       
 
 
-      
-        <span class="post-read-time"
-          >— 4 min read</span
-        >
       
     </div>
 
@@ -213,13 +241,14 @@
 
 
   <div class="collapsable-code">
-    <input id="421796853" type="checkbox" checked />
-    <label for="421796853">
+    <input id="854236719" type="checkbox" checked />
+    <label for="854236719">
       <span class="collapsable-code__language">org</span>
       <span class="collapsable-code__title">官网上的示例</span>
       <span class="collapsable-code__toggle" data-label-expand="➕" data-label-collapse="➖"></span>
     </label>
     <pre class="language-org" ><code>
+
 #&#43;title:  Example Org File
 #&#43;author: TEC
 #&#43;date:   2020-10-27
@@ -271,6 +300,7 @@ return cssRatios
 | org-demo.css | 77% minified ( 2.8 KiB) |
 | errors.css   | 74% minified ( 4.9 KiB) |
 | org.css      | 75% minified (10.7 KiB) |
+
 </code></pre>
   </div>
 
@@ -429,13 +459,14 @@ Game programming is the art of programming computer games...
 
 
   <div class="collapsable-code">
-    <input id="756184293" type="checkbox" checked />
-    <label for="756184293">
+    <input id="185264973" type="checkbox" checked />
+    <label for="185264973">
       <span class="collapsable-code__language">org</span>
       <span class="collapsable-code__title">示例日记</span>
       <span class="collapsable-code__toggle" data-label-expand="➕" data-label-collapse="➖"></span>
     </label>
     <pre class="language-org" ><code>
+
 * Tuesday, 06/04/13
 ** 10:28 Company meeting
 Endless discussions about projects. Not much progress
@@ -463,6 +494,7 @@ are really cool!
 I uploaded my journal mode to marmalade and Github! Awesome!
 
 ** TODO teach org-journal how to brew coffee
+
 </code></pre>
   </div>
 
@@ -498,9 +530,7 @@ mode 可能不适合你, 因为学习成本太高了(主要是 emacs 上手难)<
 
     
       
-        
-
-<div id="disqus_thread"></div>
+        <div id="disqus_thread"></div>
 <script type="application/javascript">
     var disqus_config = function () {
     

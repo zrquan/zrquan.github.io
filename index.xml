@@ -9,12 +9,32 @@
     <description>Recent content on zrquan</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Sat, 09 Jan 2021 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title></title>
+      <title>My life in plain text</title>
+      <link>/posts/org-mode/</link>
+      <pubDate>Sat, 09 Jan 2021 00:00:00 +0800</pubDate>
+      
+      <guid>/posts/org-mode/</guid>
+      <description>
+        
+          &lt;img src=&#34;/ox-hugo/org-cover.png&#34;/&gt;
+          
+        
+        
+        
+          
+          
+        
+        </description>
+    </item>
+    
+    <item>
+      <title>20201228</title>
       <link>/journal/20201228/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -34,7 +54,7 @@
     </item>
     
     <item>
-      <title></title>
+      <title>20210104</title>
       <link>/journal/20210104/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -54,14 +74,15 @@
     </item>
     
     <item>
-      <title>My life in plain text</title>
-      <link>/posts/org-mode/</link>
+      <title>Archive</title>
+      <link>/archive/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/posts/org-mode/</guid>
+      <guid>/archive/</guid>
       <description>
         
-          &lt;img src=&#34;/ox-hugo/org-cover.png&#34;/&gt;
+          
+          
           
         
         
