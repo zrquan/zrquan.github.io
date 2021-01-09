@@ -3,7 +3,7 @@
   <head>
     
       <title>
-         ::
+        20210104 ::
         zrquan — share something
       </title>
     
@@ -46,12 +46,12 @@
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content=""/>
+<meta name="twitter:title" content="20210104"/>
 <meta name="twitter:description" content=""/>
 
 
 
-<meta property="og:title" content="" />
+<meta property="og:title" content="20210104" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/journal/20210104/" />
@@ -90,10 +90,29 @@
   <ul class="menu__inner menu__inner--desktop">
     
       
-        
-          <li><a href="/about">About</a></li>
-        
       
+        <ul class="menu__sub-inner">
+          <li class="menu__sub-inner-more-trigger">
+            Menu
+            <span class="menu__sub-inner-more-trigger-icon"
+              ><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span
+            >
+          </li>
+          <ul class="menu__sub-inner-more hidden">
+            
+              
+                <li><a href="/archive">Archive</a></li>
+              
+            
+              
+                <li><a href="/journal">Journal</a></li>
+              
+            
+          </ul>
+        </ul>
       
       
   </ul>
@@ -101,7 +120,11 @@
   <ul class="menu__inner menu__inner--mobile">
     
       
-        <li><a href="/about">About</a></li>
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="/journal">Journal</a></li>
       
     
   </ul>
@@ -142,17 +165,13 @@
   
 
   <div class="post">
-    <h1 class="post-title"></h1>
+    <h1 class="post-title">20210104</h1>
     <div class="post-meta">
       
 
       
 
 
-      
-        <span class="post-read-time"
-          >— 1 min read</span
-        >
       
     </div>
 
@@ -174,6 +193,14 @@
     <li><a href="#星期五-21-01-08">星期五, 21/01/08</a>
       <ul>
         <li><a href="#今天尽量写完-org-mode-的推荐文章"><!-- raw HTML omitted -->DONE<!-- raw HTML omitted --> 今天尽量写完 org mode 的推荐文章</a></li>
+      </ul>
+    </li>
+    <li><a href="#星期六-21-01-09">星期六, 21/01/09</a>
+      <ul>
+        <li><a href="#00-39-午夜">00:39 午夜</a></li>
+        <li><a href="#14-56">14:56</a></li>
+        <li><a href="#15-12-俏郎君">15:12 《俏郎君》</a></li>
+        <li><a href="#21-17-完善-ox-hugo-导出功能">21:17 完善 ox-hugo 导出功能</a></li>
       </ul>
     </li>
   </ul>
@@ -204,7 +231,7 @@
 不过印象很模糊. 再往前我应该也看过很厚的积雪, 不过那时候太小, 已经完全不记得了</p>
 
   <figure class="left" >
-    <img src="/ox-hugo/%e5%be%ae%e4%bf%a1%e5%9b%be%e7%89%87_20210108142436.jpg"   />
+    <img src="/ox-hugo/2021-01-09_11-19-26_2021-01-08_snow.jpg"   />
     
   </figure>
 
@@ -214,6 +241,45 @@
 <ul>
 <li>State &ldquo;DONE&rdquo;       from &ldquo;TODO&rdquo;       <!-- raw HTML omitted --><!-- raw HTML omitted -->[2021-01-08 周五 14:23]<!-- raw HTML omitted --><!-- raw HTML omitted --></li>
 </ul>
+<h2 id="星期六-21-01-09">星期六, 21/01/09</h2>
+<h3 id="00-39-午夜">00:39 午夜</h3>
+<p>单纯想看看半夜写日记的话, 是按哪一天算. 感觉从早上开始算新的一天比较合适, 设置很
+简单:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-emacs-lisp" data-lang="emacs-lisp">(setq org-extend-today-until <span style="color:#ae81ff">6</span>)
+</code></pre></div><h3 id="14-56">14:56</h3>
+<p>果然又忍不住折腾起来了, 想用 org-reveal 做一个 gallery 分享一些喜欢的图片或者照片,
+再搞个网易云插件分享喜欢的音乐😵</p>
+<p>考虑了一下之后还是觉得太不务正业了, 花这时间还不如去学习学习, 写点有营养的文章.
+所以还是决定尽量保持博客的简洁, 所有分享的东西直接放在日记里就好了</p>
+<h3 id="15-12-俏郎君">15:12 《俏郎君》</h3>
+
+
+
+
+<div><iframe id="biliplayer" src="//player.bilibili.com/player.html?bvid=BV16h41127L6&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" loading="lazy" > </iframe></div>
+
+
+
+<style>
+#biliplayer {
+    width: 100%;
+    height: 550px;
+}
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+    #biliplayer {
+        width: 100%;
+        height: 250px;
+    }
+}
+</style>
+
+<h3 id="21-17-完善-ox-hugo-导出功能">21:17 完善 ox-hugo 导出功能</h3>
+<p>当我想使用 hugo 的 shortcode 生成一个可折叠的代码块时, 会导致最终多出两行
+markdown 的标记:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-markdown" data-lang="markdown"><span style="color:#e6db74">```text
+</span><span style="color:#e6db74">```</span>
+</code></pre></div><p>所以我想找一个可以在 org mode 中使用代码块, 而 ox-hugo 只导出代码块内文本的方法,
+目前有一个不是很优雅的解决方法——使用 <code>#+begin_export html</code></p>
     </div>
     
 

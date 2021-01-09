@@ -1,5 +1,6 @@
 +++
 title = "My life in plain text"
+publishDate = 2021-01-09
 tags = ["emacs", "org-mode"]
 draft = false
 cover = "ox-hugo/org-cover.png"
@@ -25,6 +26,7 @@ cover = "ox-hugo/org-cover.png"
 文学编程、写 LaTeX 等等
 
 {{< code language="org" title="官网上的示例" expand="➕" collapse="➖" isCollapsed="true" >}}
+
 #+title:  Example Org File
 #+author: TEC
 #+date:   2020-10-27
@@ -76,6 +78,7 @@ return cssRatios
 | org-demo.css | 77% minified ( 2.8 KiB) |
 | errors.css   | 74% minified ( 4.9 KiB) |
 | org.css      | 75% minified (10.7 KiB) |
+
 {{< /code >}}
 
 上面的 org 文件在我的 emacs 上的样子:
@@ -229,6 +232,7 @@ Homepage: <http://github.com/bastibe/org-journal>
 写日记专用, 方便自动生成日记, 配置日记模板, 而且提供强大的搜索功能
 
 {{< code language="org" title="示例日记" expand="➕" collapse="➖" isCollapsed="true" >}}
+
 * Tuesday, 06/04/13
 ** 10:28 Company meeting
 Endless discussions about projects. Not much progress
@@ -256,6 +260,7 @@ are really cool!
 I uploaded my journal mode to marmalade and Github! Awesome!
 
 ** TODO teach org-journal how to brew coffee
+
 {{< /code >}}
 
 
