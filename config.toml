@@ -61,3 +61,8 @@ disqusShortname = "4shen0ne"
         identifier = "journal"
         name = "Journal"
         url = "/journal"
+
+[markup]
+  defaultMarkdownHandler = "blackfriday"
+  [markup.blackFriday]
+    extensions = ["joinLines"]
