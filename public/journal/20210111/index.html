@@ -3,7 +3,7 @@
   <head>
     
       <title>
-        Journals ::
+        20210111 ::
         zrquan — share something
       </title>
     
@@ -18,7 +18,7 @@
   content=""
 />
 <meta name="robots" content="noodp" />
-<link rel="canonical" href="/journal/" />
+<link rel="canonical" href="/journal/20210111/" />
 
 
 
@@ -46,20 +46,19 @@
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Journals"/>
+<meta name="twitter:title" content="20210111"/>
 <meta name="twitter:description" content=""/>
 
 
 
-<meta property="og:title" content="Journals" />
+<meta property="og:title" content="20210111" />
 <meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="/journal/" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/journal/20210111/" />
 <meta property="og:site_name" content="zrquan" />
 
 
 
-<link rel="alternate" type="application/rss+xml" href="/journal/index.xml" title="zrquan" />
 
 
 
@@ -162,87 +161,56 @@
 
       <div class="content">
         
-  <div class="posts">
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">20210111</h1>
+    <div class="post-meta">
+      
+
+      
+
+
+      
+    </div>
+
     
-      <div class="post on-list">
-        <h1 class="post-title"><a href="/journal/20201228/">20201228</a></h1>
-        <div class="post-meta">
-          
-          
 
-
-          
-        </div>
-
-        
-
-        
-
-        <div class="post-content">
-          
-            
-              
-            
-          
-        </div>
-        
-      </div>
     
-      <div class="post on-list">
-        <h1 class="post-title"><a href="/journal/20210104/">20210104</a></h1>
-        <div class="post-meta">
-          
-          
 
+    <div class="post-content">
+      
+        <h2>Table of Contents</h2>
+        <aside class="table-of-contents"><nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#星期二-21-01-12">星期二, 21/01/12</a>
+<ul>
+<li><a href="#14-19-hugo-空格问题">14:19 hugo 空格问题</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav></aside>
+      
+      <h2 id="星期二-21-01-12">星期二, 21/01/12</h2>
 
-          
-        </div>
+<h3 id="14-19-hugo-空格问题">14:19 hugo 空格问题</h3>
 
-        
+<p>hugo 渲染 md 中的多行文本时, 会在换行的位置多加一个空格</p>
 
-        
-
-        <div class="post-content">
-          
-            
-              
-            
-          
-        </div>
-        
-      </div>
+<p>网上搜了一下只找到 blackfriday 的解决方法, 但 hugo 现在的默认渲染引擎已经换成goldmark 了, 需要先换成 blackfriday</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">markup</span>]
+  <span style="color:#a6e22e">defaultMarkdownHandler</span> = <span style="color:#e6db74">&#34;blackfriday&#34;</span>
+  [<span style="color:#a6e22e">markup</span>.<span style="color:#a6e22e">blackFriday</span>]
+    <span style="color:#a6e22e">extensions</span> = [<span style="color:#e6db74">&#34;joinLines&#34;</span>]</code></pre></div>
+    </div>
     
-      <div class="post on-list">
-        <h1 class="post-title"><a href="/journal/20210111/">20210111</a></h1>
-        <div class="post-meta">
-          
-          
 
-
-          
-        </div>
-
-        
-
-        
-
-        <div class="post-content">
-          
-            
-              
-            
-          
-        </div>
-        
-      </div>
     
-    <div class="pagination">
-  <div class="pagination__buttons">
+      
     
-    
-  </div>
-</div>
-
   </div>
 
       </div>
