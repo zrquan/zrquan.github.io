@@ -190,6 +190,10 @@
 <ul>
 <li><a href="#14-19-hugo-空格问题">14:19 hugo 空格问题</a></li>
 </ul></li>
+<li><a href="#星期四-21-01-14">星期四, 21/01/14</a>
+<ul>
+<li><a href="#11-17-java-编码问题">11:17 java 编码问题</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav></aside>
@@ -205,6 +209,19 @@
   <span style="color:#a6e22e">defaultMarkdownHandler</span> = <span style="color:#e6db74">&#34;blackfriday&#34;</span>
   [<span style="color:#a6e22e">markup</span>.<span style="color:#a6e22e">blackFriday</span>]
     <span style="color:#a6e22e">extensions</span> = [<span style="color:#e6db74">&#34;joinLines&#34;</span>]</code></pre></div>
+<h2 id="星期四-21-01-14">星期四, 21/01/14</h2>
+
+<h3 id="11-17-java-编码问题">11:17 java 编码问题</h3>
+
+<p>调试 ysoserial 发现 payload 在 windows 上一直执行不成功, 但在 linux 上又没问题 (其实这里就应该想到是恶心的编码问题了😵)</p>
+
+<p>debug 了一下 readObject 方法, 发现变量 <code>tc</code> (描述后续数据块的类型)不对劲, 打开文件看一下发现 windows 上生成的 payload 编码格式明显是双字节的, 这才想起 windows 默认用的 gbk 编码</p>
+
+<p>另外在指定编码时也有一个坑, 当使用以下命令</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">java -Dfile.encoding=utf-8 -jar ysoserial.jar</code></pre></div>
+<p>在 cmd 上没啥问题, 但如果在 powershell 执行, 会显示</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">Error: Could not find or load main class .encoding=utf-8</code></pre></div>
+<p>具体原因也不太清楚😩</p>
     </div>
     
 
