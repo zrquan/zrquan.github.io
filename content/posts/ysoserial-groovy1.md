@@ -156,7 +156,7 @@ MethodClosure 对象变成了我要执行的命令，也就是 String。
 
 因此这一次不会进入 `if (isClosure)` ，而是执行到以下 return 语句中
 
-```text
+```java
 return method != null ? method.doMethodInvoke(object, arguments) : this.invokePropertyOrMissing(object, methodName, originalArguments, fromInsideClass, isCallToSuper);
 ```
 
