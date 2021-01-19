@@ -9,10 +9,30 @@
     <description>Recent content on zrquan</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 09 Jan 2021 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 19 Jan 2021 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Ysoserial-Groovy1</title>
+      <link>/posts/ysoserial-groovy1/</link>
+      <pubDate>Tue, 19 Jan 2021 00:00:00 +0800</pubDate>
+      
+      <guid>/posts/ysoserial-groovy1/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          &lt;p&gt;最近想要加强一下自己的代码能力和漏洞分析能力，于是想到学习 ysoserial 的代码。文章主要记录自己调试的过程，理清利用链的思路，对一些基础知识不会做过多解释。&lt;/p&gt;
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>My life in plain text</title>
