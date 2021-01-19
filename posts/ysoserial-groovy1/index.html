@@ -392,7 +392,7 @@ closure<span style="color:#f92672">.</span><span style="color:#a6e22e">delegate<
 <p>ownerMetaClass 依然是 MetaClassImpl 类，所以这里递归调用了 invokeMethod 方法，不过MethodClosure 对象变成了我要执行的命令，也就是 String。</p>
 
 <p>因此这一次不会进入 <code>if (isClosure)</code> ，而是执行到以下 return 语句中</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">return method != null ? method.doMethodInvoke(object, arguments) : this.invokePropertyOrMissing(object, methodName, originalArguments, fromInsideClass, isCallToSuper);</code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">return</span> method <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> method<span style="color:#f92672">.</span><span style="color:#a6e22e">doMethodInvoke</span><span style="color:#f92672">(</span>object<span style="color:#f92672">,</span> arguments<span style="color:#f92672">)</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">invokePropertyOrMissing</span><span style="color:#f92672">(</span>object<span style="color:#f92672">,</span> methodName<span style="color:#f92672">,</span> originalArguments<span style="color:#f92672">,</span> fromInsideClass<span style="color:#f92672">,</span> isCallToSuper<span style="color:#f92672">);</span></code></pre></div>
 <p>命令字符串从 doMethodInvoke 进入到 <code>ProcessGroovyMethods.execute</code> ，最终导致命令执行：</p>
 
 
