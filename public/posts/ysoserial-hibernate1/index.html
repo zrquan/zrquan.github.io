@@ -235,8 +235,8 @@
 
 
   <div class="collapsable-code">
-    <input id="324615789" type="checkbox" checked />
-    <label for="324615789">
+    <input id="698542137" type="checkbox" checked />
+    <label for="698542137">
       <span class="collapsable-code__language">java</span>
       <span class="collapsable-code__title">示例代码</span>
       <span class="collapsable-code__toggle" data-label-expand="➕" data-label-collapse="➖"></span>
@@ -367,7 +367,17 @@ public class demo {
 
 <p>方法的最后将 StubTransletPayload 实例转换成 byte 数组，赋给 templates 变量的 <code>_bytecodes</code> 属性，并设置了 <code>_name</code> 和 <code>_tfactory</code> 属性。</p>
 
-<p>返回的 templates 变量是 TemplatesImpl 类的实例，执行完 createTemplatesImpl 后，它的结构大致如下图所示：接下来执行的代码是 makeGetter 方法：</p>
+<p>返回的 templates 变量是 TemplatesImpl 类的实例，执行完 createTemplatesImpl 后，它的结构大致如下图所示：</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/templates.png"   />
+    
+  </figure>
+
+
+
+<p>接下来执行的代码是 makeGetter 方法：</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Object getters <span style="color:#f92672">=</span> makeGetter<span style="color:#f92672">(</span>tpl<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">(),</span> <span style="color:#e6db74">&#34;getOutputProperties&#34;</span><span style="color:#f92672">);</span></code></pre></div>
 <p>首先通过系统属性判断当前的 hibernate 版本，ysoserial 使用的是 4.3 版本，所以直接跳到 makeHibernate4Getter 函数。</p>
 
@@ -379,7 +389,17 @@ public class demo {
 
 
 
-<p>这一部分比较简单，通过反射机制创建了一个 <code>BasicPropertyAccessor$BasicGetter</code> 实例，并赋值了 clazz、method、propertyName 属性，然后放到 Getter 数组中。类图大致如下：最后执行的是 <code>makeCaller(tpl, getters)</code> ，通过反射机制进行一系列生成实例、赋值属性的操作，然后返回一个 HashMap 对象。</p>
+<p>这一部分比较简单，通过反射机制创建了一个 <code>BasicPropertyAccessor$BasicGetter</code> 实例，并赋值了 clazz、method、propertyName 属性，然后放到 Getter 数组中。类图大致如下：</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/getter.png"   />
+    
+  </figure>
+
+
+
+<p>最后执行的是 <code>makeCaller(tpl, getters)</code> ，通过反射机制进行一系列生成实例、赋值属性的操作，然后返回一个 HashMap 对象。</p>
 
 
   <figure class="left" >
@@ -412,6 +432,14 @@ public class demo {
 <p><code>Gadgets.makeMap(v1, v2)</code> 将两个相同的 TypedValue 实例写入到 HashMap 中，payload 的构造到此就完成了，当目标应用反序列化这个 HashMap 对象时，我们写入的命令就会执行。</p>
 
 <p>HashMap 的类图大致如下：</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/hashmap.png"   />
+    
+  </figure>
+
+
 
 <h2 id="反序列化过程">反序列化过程</h2>
 
