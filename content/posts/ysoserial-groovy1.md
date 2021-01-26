@@ -36,8 +36,8 @@ public InvocationHandler getObject(final String command) throws Exception {
 2.  创建一个 map 对象，实则是一个动态代理对象，调用这个对象的方法时会代理
     到上面的 closure 对象的处理逻辑中(invoke)；
 
-3.  创建最终的恶意对象，把上面的动态代理对象 map 保存到属性中，当反序列化 handler 时,
-    就会通过层层调用最终执行 closure 里面的命令。
+3.  创建最终的恶意对象，把上面的动态代理对象 map 保存到属性中，当反序列
+    化 handler 时，就会通过层层调用最终执行 closure 里面的命令。
 
 
 ## 构造 payload {#构造-payload}
@@ -46,7 +46,8 @@ public InvocationHandler getObject(final String command) throws Exception {
 
 {{< figure src="/ox-hugo/2021-01-18_17-58-12_screenshot.png" >}}
 
-再看看其父类 ConversionHandler 的构造函数：
+调用了父类的构造函数并设置了 methodName 属性，跟进其父类 ConversionHandler 的构造
+函数：
 
 {{< figure src="/ox-hugo/2021-01-18_17-59-30_screenshot.png" >}}
 
@@ -87,8 +88,8 @@ getFirstCtor 方法可以通过反射得到 AnnotationInvocationHandler 类的�
 通过反射机制，是因为 AnnotationInvocationHandler 的构造函数没有 `public` 修饰，不能
 通过 `new` 直接访问。
 
-从 AnnotationInvocationHandler 的构造函数看到，我传入的 map 对象将会赋值给
-memberValues 属性：
+从 AnnotationInvocationHandler 的构造函数看到，我传入的 map 对象将会赋值
+给 memberValues 属性：
 
 {{< figure src="/ox-hugo/2021-01-18_19-54-56_screenshot.png" >}}
 
@@ -119,9 +120,8 @@ public Object invokeCustom(Object proxy, Method method, Object[] args) throws Th
 }
 ```
 
-这里 `&&` 的优先级高于三目运算符，当 `this.methodName` 既不等于空也不等于
-`method.getName()` 时返回 null，不然就会执行
-`((Closure)this.getDelegate()).call(args)` 。
+这里 `&&` 的优先级高于三目运算符，当 `this.methodName` 既不等于空也不等
+于 `method.getName()` 时返回 null，不然就会执行 `((Closure)this.getDelegate()).call(args)` 。
 
 我们回顾一下在构造 payload 时，设置的一些属性：
 
