@@ -145,6 +145,9 @@ TemplatesImpl、AbstractTranslet、TransformerFactoryImpl 三个类的全局限�
 
 返回的 templates 变量是 TemplatesImpl 类的实例，执行完 createTemplatesImpl 后，它的结
 构大致如下图所示：
+
+{{< figure src="/ox-hugo/templates.png" >}}
+
 接下来执行的代码是 makeGetter 方法：
 
 ```java
@@ -158,6 +161,9 @@ Object getters = makeGetter(tpl.getClass(), "getOutputProperties");
 
 这一部分比较简单，通过反射机制创建了一个 `BasicPropertyAccessor$BasicGetter` 实例，
 并赋值了 clazz、method、propertyName 属性，然后放到 Getter 数组中。类图大致如下：
+
+{{< figure src="/ox-hugo/getter.png" >}}
+
 最后执行的是 `makeCaller(tpl, getters)` ，通过反射机制进行一系列生成实例、赋值属性
 的操作，然后返回一个 HashMap 对象。
 
@@ -178,6 +184,8 @@ Reflections 类封装了一些反射机制的操作，注意到生成 PojoCompon
 到此就完成了，当目标应用反序列化这个 HashMap 对象时，我们写入的命令就会执行。
 
 HashMap 的类图大致如下：
+
+{{< figure src="/ox-hugo/hashmap.png" >}}
 
 
 ## 反序列化过程 {#反序列化过程}
