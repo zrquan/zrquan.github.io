@@ -9,10 +9,30 @@
     <description>Recent content in java on zrquan</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 19 Jan 2021 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 26 Jan 2021 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="/tags/java/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Ysoserial-Hibernate1</title>
+      <link>/posts/ysoserial-hibernate1/</link>
+      <pubDate>Tue, 26 Jan 2021 00:00:00 +0800</pubDate>
+      
+      <guid>/posts/ysoserial-hibernate1/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          &lt;p&gt;Hibernate 是 Java 的一个对象关系映射(ORM)框架，使用 GNU 开源协议。该利用链以 HashMap 为入口点，通过 hibernate-core 包中的多个类及其方法构成调用路径，最终执行事先写入到 TemplatesImpl 类中的命令。&lt;/p&gt;
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>Ysoserial-Groovy1</title>
