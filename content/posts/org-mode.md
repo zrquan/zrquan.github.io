@@ -103,7 +103,7 @@ Org mode 提供了表格编辑功能，一些基础操作比如：行列编辑�
 {{< figure src="/ox-hugo/org-table.gif" >}}
 
 Org mode 的代码块不仅仅提供高亮，它可以给数十种语言提供统一的执行环境，传递每个代
-码块的执行结果。简单来说，你可以用 org mode 进行(文学)编程，类似于[Jupyter Notebook](https://jupyter.org/)。
+码块的执行结果。简单来说，你可以用 org mode 进行(文学)编程，类似于 [Jupyter Notebook](https://jupyter.org/)。
 
 {{< figure src="/ox-hugo/org-babel.gif" >}}
 
@@ -114,22 +114,22 @@ Org mode 的代码块不仅仅提供高亮，它可以给数十种语言提供�
 {{< figure src="/ox-hugo/org-links.gif" >}}
 
 你可以用 org mode 来写几乎任何类型的作品，因为它提供了一个功能强大、扩展性高的导
-出引擎，你可以自定义导出文件的格式。同时 org mode 也支持[Pandoc](https://pandoc.org/)作为导出工具。
+出引擎，你可以自定义导出文件的格式。同时 org mode 也支持 [Pandoc](https://pandoc.org/) 作为导出工具。
 
-因为我很少将 org 文件导出到其他格式中，所以没怎么折腾这方面的配置，就只演示一下将
-org 文件导出成 html 文档吧。
+因为我很少将 org 文件导出到其他格式中，所以没怎么折腾这方面的配置，就只演示一下
+将 org 文件导出成 html 文档吧。
 
 {{< figure src="/ox-hugo/org-export.gif" >}}
 
 Org mode 还有很多功能，比如你可以给每个标题设置标签、属性、附件、时间戳，可以很
-方便地修改图片大小、导出样式，还可以用[Drawer](https://orgmode.org/manual/Drawers.html#Drawers)隐藏一些信息，以及很多我还没了解到的
+方便地修改图片大小、导出样式，还可以用 [Drawer ](https://orgmode.org/manual/Drawers.html#Drawers)隐藏一些信息，以及很多我还没了解到的
 功能。下面的章节介绍一些常用的，且我个人觉得很有帮助的功能和插件，剩下的就不一一
 展示了，建议有兴趣的直接去看官方手册。
 
 
 ## Capture & Refile {#capture-and-refile}
 
-用过 OneNote 的应该知道它有一个“快速笔记“，用来快速记录一些灵感或者摘抄，待之后
+用过 OneNote 的应该知道它有一个“快速笔记”，用来快速记录一些灵感或者摘抄，待之后
 再进行整理。Org mode 的 Capture 同样可以让你在(emacs 上)任何地方进行笔记，然后自
 动保存到你设置好的 org 文件中。
 
@@ -145,14 +145,14 @@ Org Capture 更好用的地方是，你可以自定义”快速笔记”的模�
     ))
 ```
 
-这段代码设置了两个 Capture 模板——一个是待办事项，快捷键是 `i` ，它会自动创建一个 TODO
-事项并插入当前的时间戳，保存到 inbox.org 文件中；另一个是快速笔记，快捷键是 `n` ，它
-会自动粘贴剪切板的文本到笔记中，且在完成后跳转到笔记文件。
+这段代码设置了两个 Capture 模板——一个是待办事项，快捷键是 `i` ，它会自动创建一
+个 TODO 事项并插入当前的时间戳，保存到 inbox.org 文件中；另一个是快速笔记，快捷
+键是 `n` ，它会自动粘贴剪切板的文本到笔记中，且在完成后跳转到笔记文件。
 
 {{< figure src="/ox-hugo/org-capture.gif" >}}
 
-当你需要整理 Capture 笔记时，可以用 Refile 功能，它可以将一个段落转移或复制到任意 org
-文件中，或其他段落下。你也可以用复制粘贴做到这一点，但 Refile 更优雅😎
+当你需要整理 Capture 笔记时，可以用 Refile 功能，它可以将一个段落转移或复制到任
+意 org 文件中，或其他段落下。你也可以用复制粘贴做到这一点，但 Refile 更优雅😎
 
 {{< figure src="/ox-hugo/org-refile.gif" >}}
 
@@ -183,8 +183,8 @@ Org Agenda 是一个日程管理工具，提供了一个界面进行日程相关
 ## 一些扩展包 {#一些扩展包}
 
 Org mode 的另一强大之处，是它运行在 emacs 这个平台上，emacs 强大的扩展性可以让开发者
-为 org mode 创作各种各样的插件，满足你做笔记、写博客、写论文、管理个人 wiki 甚至写
-PPT 等各种需求。
+为 org mode 创作各种各样的插件，满足你做笔记、写博客、写论文、管理个人 wiki 甚至
+写 PPT 等各种需求。
 
 下面介绍一些我正在使用的扩展包，详细的功能请到各自的主页去了解。除了这些还有很多
 扩展包，有一些我也在用的用来加强原生功能的包我没写出来，等你们真正使用 org mode 时
@@ -268,7 +268,7 @@ I uploaded my journal mode to marmalade and Github! Awesome!
 
 Homepage: <https://ox-hugo.scripter.co>
 
-将 org 文件导出为[hugo](https://gohugo.io/)的 markdown 文件，支持大部分 hugo 配置，而且你可以选择导出某个子树
+将 org 文件导出为 [hugo](https://gohugo.io/) 的 markdown 文件，支持大部分 hugo 配置，而且你可以选择导出某个子树
 为一篇文章，设置了 TODO 的子树被视为草稿。
 
 现在这个博客就是用这个包导出文章的。
@@ -278,8 +278,8 @@ Homepage: <https://ox-hugo.scripter.co>
 
 Homepage: <https://github.com/yjwen/org-reveal>
 
-前面我说可以用 org mode 写 PPT，并不是真的能写 PPT，但是 org-reveal 可以借助前端框架
-[reveal.js](https://revealjs.com/)将 org 文件导出成一个幻灯片网页。
+前面我说可以用 org mode 写 PPT，并不是真的能写 PPT，但是 org-reveal 可以借助前端
+框架 [reveal.js](https://revealjs.com/) 将 org 文件导出成一个幻灯片网页。
 
 虽然功能上可能没 PPT 那么丰富，但是绝对可以应付大部分工作展示的需求，关键是可以
 让你从各种字体图片的大小、位置、尺寸问题中解脱，像写文章一样写幻灯片，你只需要专
@@ -290,8 +290,8 @@ Homepage: <https://github.com/yjwen/org-reveal>
 
 Homepage: <https://gitlab.com/phillord/org-drill>
 
-通过 org mode 实现类似于”记忆卡片“的功能，可以选择不同记忆算法来制定复习计划，搭配
-org capture 来制作生词本效果很好，我准备用它来背英语单词。
+通过 org mode 实现类似于“记忆卡片”的功能，可以选择不同记忆算法来制定复习计划，搭
+配 org capture 来制作生词本效果很好，我准备用它来背英语单词。
 
 分享一篇教学文章：<https://jmm.io/pr/emacs-meetup/#/> ，这文章就是用 reveal.js 制作的。
 

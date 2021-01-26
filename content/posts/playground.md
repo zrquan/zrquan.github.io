@@ -41,5 +41,18 @@ ROP（return-oriented programming，面向返回编程）技术，只不过 ROP 
 度，我们需要充分了解通过反序列化操作能被操控的那部分代码。这也是反序列化漏洞利用
 过程中的难点所在[^fn:2]。
 
+
+### empty {#empty}
+
+null[^fn:3]
+
+
+## plantuml {#plantuml}
+
+{{< figure src="/ox-hugo/plantuml-test.png" >}}
+
+testtesttest
+
 [^fn:1]: <https://www.anquanke.com/post/id/86641>
 [^fn:2]: test
+[^fn:3]: null
