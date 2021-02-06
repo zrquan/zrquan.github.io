@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/</loc>
+    <lastmod>2021-01-28T00:00:00+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/java/</loc>
     <lastmod>2021-01-28T00:00:00+08:00</lastmod>
   </url>
@@ -13,17 +18,7 @@
   </url>
   
   <url>
-    <loc>/tags/</loc>
-    <lastmod>2021-01-28T00:00:00+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/posts/ysoserial-urldns/</loc>
-    <lastmod>2021-01-28T00:00:00+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
     <lastmod>2021-01-28T00:00:00+08:00</lastmod>
   </url>
   
@@ -58,27 +53,16 @@
   </url>
   
   <url>
-    <loc>/journal/20201228/</loc>
+    <loc>/about/</loc>
+    <lastmod>2020-04-11T19:15:32+08:00</lastmod>
   </url>
   
   <url>
-    <loc>/journal/20210104/</loc>
+    <loc>/archives/</loc>
   </url>
   
   <url>
-    <loc>/journal/20210111/</loc>
-  </url>
-  
-  <url>
-    <loc>/archive/</loc>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>/journal/</loc>
+    <loc>/search/</loc>
   </url>
   
 </urlset>
