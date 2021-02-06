@@ -1,37 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>zrquan</title>
-    
-    
-    
+    <title>/home/zrquan</title>
     <link>/</link>
-    <description>Recent content on zrquan</description>
+    <description>Recent content on /home/zrquan</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Thu, 28 Jan 2021 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <language>en</language>
+    <lastBuildDate>Thu, 28 Jan 2021 00:00:00 +0800</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Ysoserial-URLDNS</title>
       <link>/posts/ysoserial-urldns/</link>
       <pubDate>Thu, 28 Jan 2021 00:00:00 +0800</pubDate>
       
       <guid>/posts/ysoserial-urldns/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          
-          
-        
-        </description>
+      <description></description>
     </item>
     
     <item>
@@ -40,18 +22,7 @@
       <pubDate>Tue, 26 Jan 2021 00:00:00 +0800</pubDate>
       
       <guid>/posts/ysoserial-hibernate1/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          &lt;p&gt;Hibernate 是 Java 的一个对象关系映射(ORM)框架，使用 GNU 开源协议。该利用链以 HashMap 为入口点，通过 hibernate-core 包中的多个类及其方法构成调用路径，最终执行事先写入到 TemplatesImpl 类中的命令。&lt;/p&gt;
-          
-        
-        </description>
+      <description>&lt;p&gt;Hibernate 是 Java 的一个对象关系映射(ORM)框架，使用 GNU 开源协议。该利用链以 HashMap 为入口点，通过 hibernate-core 包中的多个类及其方法构成调用路径，最终执行事先写入到 TemplatesImpl 类中的命令。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -60,18 +31,7 @@
       <pubDate>Tue, 19 Jan 2021 00:00:00 +0800</pubDate>
       
       <guid>/posts/ysoserial-groovy1/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          &lt;p&gt;最近想要加强一下自己的代码能力和漏洞分析能力，于是想到学习 ysoserial 的代码。文章主要记录自己调试的过程，理清利用链的思路，对一些基础知识不会做过多解释。&lt;/p&gt;
-          
-        
-        </description>
+      <description>&lt;p&gt;最近想要加强一下自己的代码能力和漏洞分析能力，于是想到学习 ysoserial 的代码。文章主要记录自己调试的过程，理清利用链的思路，对一些基础知识不会做过多解释。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -80,97 +40,19 @@
       <pubDate>Sat, 09 Jan 2021 00:00:00 +0800</pubDate>
       
       <guid>/posts/org-mode/</guid>
-      <description>
-        
-          &lt;img src=&#34;/ox-hugo/org-cover.png&#34;/&gt;
-          
-        
-        
-        
-          
-          
-        
-        </description>
+      <description></description>
     </item>
     
     <item>
-      <title>20201228</title>
-      <link>/journal/20201228/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <title>About Hugo</title>
+      <link>/about/</link>
+      <pubDate>Sat, 11 Apr 2020 19:15:32 +0800</pubDate>
       
-      <guid>/journal/20201228/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          
-          
-        
-        </description>
-    </item>
-    
-    <item>
-      <title>20210104</title>
-      <link>/journal/20210104/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/journal/20210104/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          
-          
-        
-        </description>
-    </item>
-    
-    <item>
-      <title>20210111</title>
-      <link>/journal/20210111/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/journal/20210111/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          
-          
-        
-        </description>
-    </item>
-    
-    <item>
-      <title>Archive</title>
-      <link>/archive/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/archive/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          
-          
-        
-        </description>
+      <guid>/about/</guid>
+      <description>Written in Go, Hugo is an open source static site generator available under the Apache Licence 2.0. Hugo supports TOML, YAML and JSON data file types, Markdown and HTML content files and uses shortcodes to add rich content. Other notable features are taxonomies, multilingual mode, image processing, custom output formats, HTML/CSS/JS minification and support for Sass SCSS workflows.
+Hugo makes use of a variety of open source projects including:
+ https://github.com/yuin/goldmark https://github.com/alecthomas/chroma https://github.com/muesli/smartcrop https://github.com/spf13/cobra https://github.com/spf13/viper  Hugo is ideal for blogs, corporate websites, creative portfolios, online magazines, single page applications or even a website with thousands of pages.
+Hugo is for people who want to hand code their own website without worrying about setting up complicated runtimes, dependencies and databases.</description>
     </item>
     
   </channel>

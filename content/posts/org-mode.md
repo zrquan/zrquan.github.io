@@ -1,6 +1,6 @@
 +++
 title = "My life in plain text"
-publishDate = 2021-01-09
+publishDate = 2021-01-09T00:00:00+08:00
 tags = ["emacs", "org-mode"]
 draft = false
 cover = "ox-hugo/org-cover.png"
@@ -8,25 +8,24 @@ cover = "ox-hugo/org-cover.png"
 
 <!--more-->
 
-这好像是我第三次开始写博客了，前两次都是水了几篇笔记就放弃了，一方面是我本来就不
-喜欢写东西，另一方面是感觉写博客太花时间了，主题、格式、配置一顿折腾，又写不出什
-么有营养的东西😂
+这好像是我第三次开始写博客了，前两次都是水了几篇笔记就放弃了，一方面是我本来就不喜欢写东西，另一方面是感觉写博客太花时间了，主题、格式、配置一顿折腾，又写不出什么有营养的东西😂
 
-但最近沉迷于 emacs 和 org mode，好像让我找到了做笔记的快感(虽然还没做多少)，所以
-打算再尝试一次，希望能坚持下去。
+但最近沉迷于 emacs 和 org mode，好像让我找到了做笔记的快感(虽然还没做多少)，所以打算再尝试一次，希望能坚持下去。
 
-那第一篇文章自然是要推荐一下无敌的 org mode 啦，事先声明本文主要是为了安利，展示
-一下 org mode 可以干什么，想看教程的话建议看[官方文档](https://orgmode.org/manual/)。
+那第一篇文章自然是要推荐一下无敌的 org mode 啦，事先声明本文主要是为了安利，展示一下 org mode 可以干什么，想看教程的话建议看[官方文档](https://orgmode.org/manual/)。
 
 
 ## 什么是 org mode {#什么是-org-mode}
 
-和大家熟悉的 markdown 一样，org mode 也可以通过不同的标记来组织文本的格式、结构，
-而且支持的标记和功能更加丰富。除了写文章，你还可以用它来管理日程、记录待办事项、
-文学编程、写 LaTeX 等等。
+和大家熟悉的 markdown 一样，org mode 也可以通过不同的标记来组织文本的格式、结构，而且支持的标记和功能更加丰富。除了写文章，你还可以用它来管理日程、记录待办事项、文学编程、写 LaTeX 等等。
 
-{{< code language="org" title="官网上的示例" expand="➕" collapse="➖" isCollapsed="true" >}}
+<details>
+<summary>
+官网上的示例
+</summary>
+<p class="details">
 
+```text
 #+title:  Example Org File
 #+author: TEC
 #+date:   2020-10-27
@@ -78,63 +77,50 @@ return cssRatios
 | org-demo.css | 77% minified ( 2.8 KiB) |
 | errors.css   | 74% minified ( 4.9 KiB) |
 | org.css      | 75% minified (10.7 KiB) |
-
-{{< /code >}}
+```
+</p>
+</details>
 
 上面的 org 文件在我的 emacs 上的样子：
 
 {{< figure src="/ox-hugo/2021-01-03_15-01-01_screenshot.png" >}}
 
-除了简单的渲染，org mode 还提供了很多命令和函数，让你可以对不同类型的文本进行各
-种操作。
+除了简单的渲染，org mode 还提供了很多命令和函数，让你可以对不同类型的文本进行各种操作。
 
 
 ## 基本功能 {#基本功能}
 
-一个 org 文件的基本结构是一棵树，以此来表现不同段落的层级关系，你可以很方便地对
-不同的节点或子树进行折叠、展开、隐藏等各种操作，专注于文件的某一部分而不受其他信
-息的影响。
+一个 org 文件的基本结构是一棵树，以此来表现不同段落的层级关系，你可以很方便地对不同的节点或子树进行折叠、展开、隐藏等各种操作，专注于文件的某一部分而不受其他信息的影响。
 
 {{< figure src="/ox-hugo/org-tree.gif" >}}
 
-Org mode 提供了表格编辑功能，一些基础操作比如：行列编辑、自动对齐、表格计算等等，
-都可以通过简单的命令或者快捷键完成。
+Org mode 提供了表格编辑功能，一些基础操作比如：行列编辑、自动对齐、表格计算等等，都可以通过简单的命令或者快捷键完成。
 
 {{< figure src="/ox-hugo/org-table.gif" >}}
 
-Org mode 的代码块不仅仅提供高亮，它可以给数十种语言提供统一的执行环境，传递每个代
-码块的执行结果。简单来说，你可以用 org mode 进行(文学)编程，类似于 [Jupyter Notebook](https://jupyter.org/)。
+Org mode 的代码块不仅仅提供高亮，它可以给数十种语言提供统一的执行环境，传递每个代码块的执行结果。简单来说，你可以用 org mode 进行(文学)编程，类似于 [Jupyter Notebook](https://jupyter.org/)。
 
 {{< figure src="/ox-hugo/org-babel.gif" >}}
 
-在 org mode 可以很方便地插入各种类型的链接，包括网页、文件、邮件、git 仓库等等，如
-果你熟悉 elisp，甚至可以自定义链接类型，更改链接的行为。不过我也是 emacs 和 org mode
+在 org mode 可以很方便地插入各种类型的链接，包括网页、文件、邮件、git 仓库等等，如果你熟悉 elisp，甚至可以自定义链接类型，更改链接的行为。不过我也是 emacs 和 org mode
 的初学者，对 elisp 还不太熟悉，感兴趣的话可以看看[官方的示例](https://orgmode.org/manual/Adding-Hyperlink-Types.html)。
 
 {{< figure src="/ox-hugo/org-links.gif" >}}
 
-你可以用 org mode 来写几乎任何类型的作品，因为它提供了一个功能强大、扩展性高的导
-出引擎，你可以自定义导出文件的格式。同时 org mode 也支持 [Pandoc](https://pandoc.org/) 作为导出工具。
+你可以用 org mode 来写几乎任何类型的作品，因为它提供了一个功能强大、扩展性高的导出引擎，你可以自定义导出文件的格式。同时 org mode 也支持 [Pandoc](https://pandoc.org/) 作为导出工具。
 
-因为我很少将 org 文件导出到其他格式中，所以没怎么折腾这方面的配置，就只演示一下
-将 org 文件导出成 html 文档吧。
+因为我很少将 org 文件导出到其他格式中，所以没怎么折腾这方面的配置，就只演示一下将 org 文件导出成 html 文档吧。
 
 {{< figure src="/ox-hugo/org-export.gif" >}}
 
-Org mode 还有很多功能，比如你可以给每个标题设置标签、属性、附件、时间戳，可以很
-方便地修改图片大小、导出样式，还可以用 [Drawer ](https://orgmode.org/manual/Drawers.html#Drawers)隐藏一些信息，以及很多我还没了解到的
-功能。下面的章节介绍一些常用的，且我个人觉得很有帮助的功能和插件，剩下的就不一一
-展示了，建议有兴趣的直接去看官方手册。
+Org mode 还有很多功能，比如你可以给每个标题设置标签、属性、附件、时间戳，可以很方便地修改图片大小、导出样式，还可以用 [Drawer ](https://orgmode.org/manual/Drawers.html#Drawers)隐藏一些信息，以及很多我还没了解到的功能。下面的章节介绍一些常用的，且我个人觉得很有帮助的功能和插件，剩下的就不一一展示了，建议有兴趣的直接去看官方手册。
 
 
 ## Capture & Refile {#capture-and-refile}
 
-用过 OneNote 的应该知道它有一个“快速笔记”，用来快速记录一些灵感或者摘抄，待之后
-再进行整理。Org mode 的 Capture 同样可以让你在(emacs 上)任何地方进行笔记，然后自
-动保存到你设置好的 org 文件中。
+用过 OneNote 的应该知道它有一个“快速笔记”，用来快速记录一些灵感或者摘抄，待之后再进行整理。Org mode 的 Capture 同样可以让你在(emacs 上)任何地方进行笔记，然后自动保存到你设置好的 org 文件中。
 
-Org Capture 更好用的地方是，你可以自定义”快速笔记”的模板、保存方式，比如以下设
-置：
+Org Capture 更好用的地方是，你可以自定义”快速笔记”的模板、保存方式，比如以下设置：
 
 ```emacs-lisp
 (setq org-capture-templates
@@ -145,14 +131,11 @@ Org Capture 更好用的地方是，你可以自定义”快速笔记”的模�
     ))
 ```
 
-这段代码设置了两个 Capture 模板——一个是待办事项，快捷键是 `i` ，它会自动创建一
-个 TODO 事项并插入当前的时间戳，保存到 inbox.org 文件中；另一个是快速笔记，快捷
-键是 `n` ，它会自动粘贴剪切板的文本到笔记中，且在完成后跳转到笔记文件。
+这段代码设置了两个 Capture 模板——一个是待办事项，快捷键是 `i` ，它会自动创建一个 TODO 事项并插入当前的时间戳，保存到 inbox.org 文件中；另一个是快速笔记，快捷键是 `n` ，它会自动粘贴剪切板的文本到笔记中，且在完成后跳转到笔记文件。
 
 {{< figure src="/ox-hugo/org-capture.gif" >}}
 
-当你需要整理 Capture 笔记时，可以用 Refile 功能，它可以将一个段落转移或复制到任
-意 org 文件中，或其他段落下。你也可以用复制粘贴做到这一点，但 Refile 更优雅😎
+当你需要整理 Capture 笔记时，可以用 Refile 功能，它可以将一个段落转移或复制到任意 org 文件中，或其他段落下。你也可以用复制粘贴做到这一点，但 Refile 更优雅😎
 
 {{< figure src="/ox-hugo/org-refile.gif" >}}
 
@@ -168,12 +151,9 @@ Org Agenda 是一个日程管理工具，提供了一个界面进行日程相关
       '((sequence "TODO(t)" "WAIT(w)" "SOMEDAY(s)" "|" "DONE(d!)" "CANCELED(c@/!)")))
 ```
 
-以上代码设置了 5 种状态，后两种意味着该事项已经结束了(完成或取消)， `d!` 这个叹号
-指当事项切换为 `DONE` 时会插入当前的时间， `c@/!` 不仅插入时间，还可以写注释说明取消
-的原因。
+以上代码设置了 5 种状态，后两种意味着该事项已经结束了(完成或取消)， `d!` 这个叹号指当事项切换为 `DONE` 时会插入当前的时间， `c@/!` 不仅插入时间，还可以写注释说明取消的原因。
 
-除此之外还可以给每个事项设置日期时间、优先级、deadline，然后通过 Org Agenda 进行
-统一管理：
+除此之外还可以给每个事项设置日期时间、优先级、deadline，然后通过 Org Agenda 进行统一管理：
 
 {{< figure src="/ox-hugo/org-agenda.gif" >}}
 
@@ -182,13 +162,9 @@ Org Agenda 是一个日程管理工具，提供了一个界面进行日程相关
 
 ## 一些扩展包 {#一些扩展包}
 
-Org mode 的另一强大之处，是它运行在 emacs 这个平台上，emacs 强大的扩展性可以让开发者
-为 org mode 创作各种各样的插件，满足你做笔记、写博客、写论文、管理个人 wiki 甚至
-写 PPT 等各种需求。
+Org mode 的另一强大之处，是它运行在 emacs 这个平台上，emacs 强大的扩展性可以让开发者为 org mode 创作各种各样的插件，满足你做笔记、写博客、写论文、管理个人 wiki 甚至写 PPT 等各种需求。
 
-下面介绍一些我正在使用的扩展包，详细的功能请到各自的主页去了解。除了这些还有很多
-扩展包，有一些我也在用的用来加强原生功能的包我没写出来，等你们真正使用 org mode 时
-自然会去了解了。
+下面介绍一些我正在使用的扩展包，详细的功能请到各自的主页去了解。除了这些还有很多扩展包，有一些我也在用的用来加强原生功能的包我没写出来，等你们真正使用 org mode 时自然会去了解了。
 
 
 ### org-brain {#org-brain}
@@ -231,8 +207,13 @@ Homepage: <http://github.com/bastibe/org-journal>
 
 写日记专用，方便自动生成日记，配置日记模板，而且提供强大的搜索功能。
 
-{{< code language="org" title="示例日记" expand="➕" collapse="➖" isCollapsed="true" >}}
+<details>
+<summary>
+示例日记
+</summary>
+<p class="details">
 
+```text
 * Tuesday, 06/04/13
 ** 10:28 Company meeting
 Endless discussions about projects. Not much progress
@@ -260,16 +241,16 @@ are really cool!
 I uploaded my journal mode to marmalade and Github! Awesome!
 
 ** TODO teach org-journal how to brew coffee
-
-{{< /code >}}
+```
+</p>
+</details>
 
 
 ### ox-hugo {#ox-hugo}
 
 Homepage: <https://ox-hugo.scripter.co>
 
-将 org 文件导出为 [hugo](https://gohugo.io/) 的 markdown 文件，支持大部分 hugo 配置，而且你可以选择导出某个子树
-为一篇文章，设置了 TODO 的子树被视为草稿。
+将 org 文件导出为 [hugo](https://gohugo.io/) 的 markdown 文件，支持大部分 hugo 配置，而且你可以选择导出某个子树为一篇文章，设置了 TODO 的子树被视为草稿。
 
 现在这个博客就是用这个包导出文章的。
 
@@ -278,20 +259,16 @@ Homepage: <https://ox-hugo.scripter.co>
 
 Homepage: <https://github.com/yjwen/org-reveal>
 
-前面我说可以用 org mode 写 PPT，并不是真的能写 PPT，但是 org-reveal 可以借助前端
-框架 [reveal.js](https://revealjs.com/) 将 org 文件导出成一个幻灯片网页。
+前面我说可以用 org mode 写 PPT，并不是真的能写 PPT，但是 org-reveal 可以借助前端框架 [reveal.js](https://revealjs.com/) 将 org 文件导出成一个幻灯片网页。
 
-虽然功能上可能没 PPT 那么丰富，但是绝对可以应付大部分工作展示的需求，关键是可以
-让你从各种字体图片的大小、位置、尺寸问题中解脱，像写文章一样写幻灯片，你只需要专
-注于内容。
+虽然功能上可能没 PPT 那么丰富，但是绝对可以应付大部分工作展示的需求，关键是可以让你从各种字体图片的大小、位置、尺寸问题中解脱，像写文章一样写幻灯片，你只需要专注于内容。
 
 
 ### org-drill {#org-drill}
 
 Homepage: <https://gitlab.com/phillord/org-drill>
 
-通过 org mode 实现类似于“记忆卡片”的功能，可以选择不同记忆算法来制定复习计划，搭
-配 org capture 来制作生词本效果很好，我准备用它来背英语单词。
+通过 org mode 实现类似于“记忆卡片”的功能，可以选择不同记忆算法来制定复习计划，搭配 org capture 来制作生词本效果很好，我准备用它来背英语单词。
 
 分享一篇教学文章：<https://jmm.io/pr/emacs-meetup/#/> ，这文章就是用 reveal.js 制作的。
 
@@ -301,8 +278,6 @@ Homepage: <https://gitlab.com/phillord/org-drill>
 其实自己习惯的工具才是效率最高的，如果你只是想要一个可以快速上手使用的工具，org
 mode 可能不适合你，因为学习成本太高了(主要是 emacs 上手难)。
 
-我个人比较喜欢折腾各种工具软件，我把 emacs 和 org mode 也是看作需要不断学习的知
-识，所以对这种一边用一边学的状态还挺乐在其中的。但不得不说这很容易让你上头，耽误
-你学习真正需要的知识的时间。
+我个人比较喜欢折腾各种工具软件，我把 emacs 和 org mode 也是看作需要不断学习的知识，所以对这种一边用一边学的状态还挺乐在其中的。但不得不说这很容易让你上头，耽误你学习真正需要的知识的时间。
 
 即使这篇是安利文章，最后还是劝你谨慎入坑🙃
