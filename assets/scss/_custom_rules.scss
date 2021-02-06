@@ -1,0 +1,9 @@
+// 此文件最后加载，用于自定义样式，覆盖主题的默认设置
+
+figure {
+    margin: 0;
+}
+
+body[data-theme='dark'] img {
+    filter: brightness(80%);
+}
