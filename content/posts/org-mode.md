@@ -6,6 +6,8 @@ draft = false
 cover = "ox-hugo/org-cover.png"
 +++
 
+{{< figure src="/ox-hugo/org-cover.png" >}}
+
 <!--more-->
 
 这好像是我第三次开始写博客了，前两次都是水了几篇笔记就放弃了，一方面是我本来就不喜欢写东西，另一方面是感觉写博客太花时间了，主题、格式、配置一顿折腾，又写不出什么有营养的东西😂
