@@ -1,11 +1,7 @@
 +++
-title = "playground"
-publishDate = 2021-01-09T00:00:00+08:00
-tags = ["test"]
+title = "===== playground ====="
 draft = true
 +++
-
-本文用于测试
 
 <!--more-->
 
