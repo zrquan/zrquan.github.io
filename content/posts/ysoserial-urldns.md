@@ -1,7 +1,7 @@
 +++
 title = "Ysoserial-URLDNS"
 publishDate = 2021-01-28T00:00:00+08:00
-tags = ["java", "反序列化"]
+tags = ["java", "unserialize"]
 draft = false
 +++
 

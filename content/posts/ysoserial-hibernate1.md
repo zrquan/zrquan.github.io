@@ -1,7 +1,7 @@
 +++
 title = "Ysoserial-Hibernate1"
 publishDate = 2021-01-26T00:00:00+08:00
-tags = ["java", "反序列化"]
+tags = ["java", "unserialize"]
 draft = false
 +++
 
