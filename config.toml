@@ -1,5 +1,5 @@
 baseURL = "/"
-title = "/home/zrquan"
+title = "zrquan"
 
 theme = "fuji"
 hasCJKLanguage = true
@@ -32,7 +32,7 @@ paginate = 10
 
 [params]
   author = "zrquan" # You can also set author in post front matter individually
-  subTitle = "share something"
+  subTitle = "每一个平凡的日常，也许就是连续发生的奇迹"
 
   # Source URL of the website, will appear in the footer
   sourceURL = "https://github.com/zrquan/zrquan.github.io"
