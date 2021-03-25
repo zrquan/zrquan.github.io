@@ -83,7 +83,7 @@ Cache-Control: public, max-age=60
 
 上文提到，在一个 http 请求中，除了缓存键外的部分可以称为非键输入，它们不会影响判断缓存是否命中。如果非键输入可以影响响应，那意味着我们可以一定程度上控制缓存服务器备份的内容，从而影响其他用户访问该资源时的行为，这就是缓存投毒。
 
-挖掘缓存投毒漏洞的方法：
+挖掘缓存投毒漏洞的方法[^fn:1]：
 
 {{< figure src="/ox-hugo/2021-03-11_17-07-30_0d97faa475af-article-methodology-full-landscape.svg" >}}
 
@@ -212,7 +212,7 @@ payload，即使可以影响响应，正常用户的请求也不会命中该缓�
 
 但总有些应用会对客户端输入进行各种处理，使得本来应该是缓存键的输入被排除在外，这就产生了更多的途径来进行缓存投毒。
 
-挖掘缓存纠缠漏洞的方法：
+挖掘缓存纠缠漏洞的方法[^fn:2]：
 
 {{< figure src="/ox-hugo/2021-03-12_17-05-11_1abc-article-methodology.png" >}}
 
@@ -334,8 +334,10 @@ xss 生效。
 
 一般浏览器发送的特殊字符都会进行 URL 编码，如果应用没有对其进行解码，即使在响应中返回也无法构成 xss 攻击。但如果缓存服务器在比较缓存键时进行了解码操作，比如让下面的两个请求命中同一缓存：
 
-1.  GET /example?param="><test>
-2.  GET /example?param=%22%3e%3ctest%3e
+```text
+1. GET /example?param="><test>
+2. GET /example?param=%22%3e%3ctest%3e
+```
 
 那我们可以用 burp 发送未编码的 payload 进行投毒，然后诱导用户访问恶意 url。即使浏览器发送了编码后的请求，也会受到 xss 攻击。
 
@@ -391,8 +393,5 @@ X-Cache: hit
 
 另外测试应用缓存时要谨慎，因为没有 cache buster，很容易影响到正常用户 👈
 
-
-## References {#references}
-
-1.  <https://portswigger.net/research/practical-web-cache-poisoning>
-2.  <https://portswigger.net/research/web-cache-entanglement>
+[^fn:1]: <https://portswigger.net/research/practical-web-cache-poisoning>
+[^fn:2]: <https://portswigger.net/research/web-cache-entanglement>
