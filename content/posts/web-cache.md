@@ -5,7 +5,7 @@ tags = ["web"]
 draft = false
 +++
 
-{{< figure src="/ox-hugo/http-caching.png" >}}
+{{< figure src="/ox-hugo/2021-03-25_15-46-12_0358ad020c37-article-cache-poisoning-article.png" >}}
 
 <!--more-->
 
@@ -268,7 +268,8 @@ payload，即使可以影响响应，正常用户的请求也不会命中该缓�
 GET /?example=123?excluded_param=<svg/onload=alert(1)>
 ```
 
-请求行有两个问号，web 服务器会把第二个问号看作 example 参数的一部分，而缓存服务器会直接忽略第二个问号后面的参数。那么当用户请求 `/?example=123` 就会就会被攻击。
+一般情况下问号出现在 GET 参数最开头，但有些应用不管问号在哪，都会认为它后面跟着的是一个参数。比如例子中请求行有两个问号，web 服务器会把第二个问号看作 example 参数的一部分，而缓存服务器则认为有 example 和 excluded\_param 两个参数。那么当用户请求
+`/?example=123` 就会被攻击。
 
 还有另外一种情况，web 服务器支持多个参数分隔符而缓存服务器不支持。比如下面的请求：
 
@@ -381,6 +382,61 @@ X-Cache: hit
 
 <script>…'-alert(1)-'…</script>
 ```
+
+
+#### Lab: Cache key injection {#lab-cache-key-injection}
+
+下述的题目涉及到包括缓存键注入在内的多个漏洞，可以用 `Pragma: x-get-cache-key` 头来显示缓存键。
+
+打开网页后观察一下日志记录，红框标出了 lang 参数的传递过程：
+
+{{< figure src="/ox-hugo/2021-03-22_21-40-24_screenshot.png" >}}
+
+首先分析一下 `localize.js` 请求，当 cors 参数为 1，响应会反射请求中的 Origin 头：
+
+{{< figure src="/ox-hugo/2021-03-25_13-50-34_screenshot.png" >}}
+
+利用 CRLF 攻击修改响应：
+
+{{< figure src="/ox-hugo/2021-03-25_15-04-14_screenshot.png" >}}
+
+这里利用到了缓存键注入攻击，上图显示的缓存键是：
+
+```text
+/js/localize.js?lang=en&cors=1$$Origin=x%0d%0aContent-Length:%208%0d%0a%0d%0aalert(1)
+```
+
+URL 和 Origin 间使用 `$$` 连接，就算没有发送 Origin 头，缓存键后面也会加上连接符。所以为了命中这个缓存键，要在上图的 Origin 后面加上 `$$` ，那么得到的缓存键就是：
+
+```text
+/js/localize.js?lang=en&cors=1$$Origin=x%0d%0aContent-Length:%208%0d%0a%0d%0aalert(1)$$
+```
+
+只要访问这个 URL 时删掉后面的 `$$` ，就会得到已经被缓存 `alert(1)` 。
+
+那么下一步要解决的是怎么让正常请求访问到这个 URL，我们知道在 login 页面会导入
+localize.js，但测试之后发现无法毒化这个页面，而且它导入 localize.js 时会在后面加上
+`cors=0` ，使 CRLF 攻击失效。
+
+{{< figure src="/ox-hugo/2021-03-25_15-21-00_screenshot.png" >}}
+
+留意一下流量日志，可以发现访问 `/login` 会被重定向到 `/login/` ，而且我们可以控制路径和参数，那么自然想到利用前文的[重定向攻击](#重定向攻击)。
+
+但是 lang 参数是缓存键，我们要先找到其他可以投毒的参数。用 param-miner 枚举后发现 utm\_content 不在缓存键中，而且由于缓存服务器对问号的处理存在问题，可以进行[参数伪装](#参数伪装)。示意图如下：
+
+{{< figure src="/ox-hugo/param-cloak.png" >}}
+
+结合之前 CRLF 攻击，构造出 payload：
+
+```text
+/login?lang=en?utm_content=x%26cors%3d1$$Origin%3dx%250d%250aContent-Length%3a%25208%250d%250a%250d%250aalert(1)%23
+```
+
+后面的 `%23(#)` 是为了注释掉导入 localize.js 时末尾添加的 `cors=0` 。
+
+DONE：
+
+{{< figure src="/ox-hugo/2021-03-26_13-53-20_screenshot.png" >}}
 
 
 ### 攻击内部缓存 {#攻击内部缓存}
