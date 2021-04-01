@@ -21,6 +21,8 @@ if __name__ == '__main__':
 </p>
 </details>
 
+通过 EAF 在 emacs 运行浏览器，写博客时可以实时预览，爽的一批。
+
 
 ## foonote test {#foonote-test}
 
@@ -37,12 +39,8 @@ ROP（return-oriented programming，面向返回编程）技术，只不过 ROP 
 
 {{< music 28111632 >}}
 
-{{< bilibili BV16h41127L6 >}}
-
 
 ## plantuml {#plantuml}
-
-{{< figure src="/ox-hugo/plantuml-test.png" >}}
 
 
 ## fuji {#fuji}
@@ -54,9 +52,34 @@ ROP（return-oriented programming，面向返回编程）技术，只不过 ROP 
 test **test** _test_
 
 
-## asciinema {#asciinema}
+## mermaid {#mermaid}
 
-<script id="asciicast-325730" src="https://asciinema.org/a/325730.js" async></script>
+{{< mermaid >}}
+gantt
+dateFormat  YYYY-MM-DD
+title 中文字体测试
+excludes weekdays 2014-01-10
+
+section A section
+Completed task            :done,    des1, 2014-01-06,2014-01-08
+Active task               :active,  des2, 2014-01-09, 3d
+Future task               :         des3, after des2, 5d
+Future task2              :         des4, after des3, 5d
+{{< /mermaid >}}
+
+{{< mermaid >}}
+sequenceDiagram
+    participant Alice
+    participant Bob
+    Alice->>John: Hello John, how are you?
+    loop Healthcheck
+        John->>John: Fight against hypochondria
+    end
+    Note right of John: Rational thoughts <br/>prevail!
+    John-->>Alice: Great!
+    John->>Bob: How about you?
+    Bob-->>John: Jolly good!
+{{< /mermaid >}}
 
 [^fn:1]: <https://www.anquanke.com/post/id/86641>
 [^fn:2]: test
