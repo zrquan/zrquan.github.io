@@ -8,6 +8,12 @@ body[data-theme='dark'] img {
     filter: brightness(80%);
 }
 
+/* fonts */
+@font-face {
+    font-family: jinkaiFont;
+    src: url("../../fonts/jinkai.ttf") format("TrueType");
+}
+
 /* custom prism theme */
 
 @mixin prism-light {
