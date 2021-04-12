@@ -104,6 +104,14 @@ node install-eaf-win32.js
           ("image-viewer" (kbd eaf-evil-leader-key))
           (_  (kbd "SPC")))
       (kbd "SPC"))))
+
+;; eaf-org
+(require 'eaf-org)
+(defun eaf-org-open-file (file &optional link)
+  "An wrapper function on `eaf-open'."
+  (eaf-open file))
+;; use `emacs-application-framework' to open PDF file: link
+(add-to-list 'org-file-apps '("\\.pdf\\'" . eaf-org-open-file))
 ```
 </p>
 </details>

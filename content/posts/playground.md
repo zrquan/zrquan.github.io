@@ -42,6 +42,8 @@ ROP（return-oriented programming，面向返回编程）技术，只不过 ROP 
 
 ## plantuml {#plantuml}
 
+{{< figure src="/ox-hugo/plantuml-test.png" >}}
+
 
 ## fuji {#fuji}
 
@@ -80,6 +82,11 @@ sequenceDiagram
     John->>Bob: How about you?
     Bob-->>John: Jolly good!
 {{< /mermaid >}}
+
+
+## test {#test}
+
+xxxxxxxxx
 
 [^fn:1]: <https://www.anquanke.com/post/id/86641>
 [^fn:2]: test
