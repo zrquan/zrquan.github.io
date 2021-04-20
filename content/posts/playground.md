@@ -5,6 +5,9 @@ draft = true
 
 <!--more-->
 
+tags
+: [eaf]({{< relref "eaf" >}})
+
 
 ## Details and Summary {#details-and-summary}
 
@@ -21,7 +24,7 @@ if __name__ == '__main__':
 </p>
 </details>
 
-通过 EAF 在 emacs 运行浏览器，写博客时可以实时预览，爽的一批。
+> 通过 EAF 在 emacs 运行浏览器，写博客时可以实时预览，爽的一批。
 
 
 ## foonote test {#foonote-test}

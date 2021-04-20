@@ -1,7 +1,7 @@
 +++
 title = "Ysoserial-Groovy1"
 publishDate = 2021-01-19T00:00:00+08:00
-tags = ["java", "unserialize"]
+tags = ["java", "deserialize"]
 draft = false
 +++
 

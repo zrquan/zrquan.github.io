@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://zrquan.github.io/"
 title = "zrquan"
 
 theme = "fuji"
@@ -100,9 +100,6 @@ paginate = 10
   # disableDarkImage = true
 
 [markup]
-  #defaultMarkdownHandler = "blackfriday"
-  #[markup.blackFriday]
-  #  extensions = ["joinLines"]
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true  # Enable user to embed HTML snippets in Markdown content
@@ -132,18 +129,18 @@ paginate = 10
     name = "Search"
     url = "/search/"
     weight = 4
-  #[[menu.nav]]
-  #  name = "RSS"
-  #  url = "/index.xml"
-  #  weight = 5
+  [[menu.nav]]
+    name = "Feed"
+    url = "/index.xml"
+    weight = 5
 
   [[menu.link]]
     name = "GitHub"
     url = "https://github.com/zrquan"
     weight = 1
   #[[menu.link]]
-  #  name = "Twitter"
-  #  url = "https://twitter.com/amzrk2"
+  #  name = "Zhihu"
+  #  url = "https://www.zhihu.com/people/4shenone"
   #  weight = 2
   #[[menu.link]]
   #  name = "bilibili"

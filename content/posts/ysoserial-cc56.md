@@ -1,7 +1,7 @@
 +++
 title = "Ysoserial-CommonsCollections5/6"
 publishDate = 2021-04-01T00:00:00+08:00
-tags = ["java", "unserialize"]
+tags = ["java", "deserialize"]
 draft = false
 +++
 

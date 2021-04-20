@@ -1,7 +1,7 @@
 +++
 title = "Ysoserial-URLDNS"
 publishDate = 2021-01-28T00:00:00+08:00
-tags = ["java", "unserialize"]
+tags = ["java", "deserialize"]
 draft = false
 +++
 
@@ -128,7 +128,7 @@ public class demo {
             user = (User) is.readObject();
             is.close();
 
-            System.out.println("After unserialized: ");
+            System.out.println("After deserialized: ");
             System.out.println("username: " + user.getName());
             System.err.println("password: " + user.getPassword());
         } catch (FileNotFoundException e) {

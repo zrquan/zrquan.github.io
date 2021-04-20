@@ -1,6 +1,6 @@
 +++
 title = "Ysoserial-CommonsCollections2"
-tags = ["java", "unserialize"]
+tags = ["java", "deserialize"]
 draft = true
 +++
 
