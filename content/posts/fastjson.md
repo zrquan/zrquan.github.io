@@ -175,4 +175,4 @@ SupportNonPublicField 选项，而这个选项是在 1.2.22 版本引入的。
 
 Fastjson 还提供了几个 parseObject 方法来解析 JSON 字符串，不过最后和本文的示例一样都会执行到 DefaultJSONParser#parse，不影响 TemplatesImpl 利用链。
 
-Fastjson 解析 JSON 字符串时，会调用反序列化对象的公共 setter 和构造函数，还有符合一定条件的 getter，TemplatesImpl 利用链就是用到了 getter方法中的漏洞。
+Fastjson 解析 JSON 字符串时，会调用反序列化对象的公共 setter 和构造函数，还有符合一定条件的 getter，TemplatesImpl 利用链就是用到了 getter 方法中的漏洞。
