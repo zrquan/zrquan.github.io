@@ -1,7 +1,7 @@
-[submodule "themes/fuji"]
-	path = themes/fuji
-	url = https://github.com/zrquan/hugo-theme-fuji.git
 [submodule "public"]
 	path = public
 	url = git@github.com:zrquan/zrquan.github.io.git
 	branch = main
+[submodule "themes/fuji"]
+	path = themes/fuji
+	url = https://github.com/dsrkafuu/hugo-theme-fuji.git
