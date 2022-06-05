@@ -1,5 +1,6 @@
 +++
 title = "Ysoserial-Hibernate1"
+author = ["4shen0ne"]
 publishDate = 2021-01-26T00:00:00+08:00
 tags = ["java", "deserialize"]
 draft = false
@@ -30,7 +31,7 @@ ysoserial 在构造 payload 时，利用了 Java 的动态字节码生成的技�
 <summary>
 示例代码
 </summary>
-<p class="details">
+<div class="details">
 
 ```java
 import javassist.*;
@@ -90,7 +91,7 @@ public class demo {
     }
 }
 ```
-</p>
+</div>
 </details>
 
 {{< figure src="/ox-hugo/2021-01-26_19-11-04_screenshot.png" >}}
@@ -133,7 +134,7 @@ TemplatesImpl、AbstractTranslet、TransformerFactoryImpl 三个类的全局限�
 
 返回的 templates 变量是 TemplatesImpl 类的实例，执行完 createTemplatesImpl 后，它的结构大致如下图所示：
 
-{{< figure src="/ox-hugo/templates.png" >}}
+{{< figure src="/ox-hugo/templates.svg" >}}
 
 接下来执行的代码是 makeGetter 方法：
 
@@ -147,7 +148,7 @@ Object getters = makeGetter(tpl.getClass(), "getOutputProperties");
 
 这一部分比较简单，通过反射机制创建了一个 `BasicPropertyAccessor$BasicGetter` 实例，并赋值了 clazz、method、propertyName 属性，然后放到 Getter 数组中。类图大致如下：
 
-{{< figure src="/ox-hugo/getter.png" >}}
+{{< figure src="/ox-hugo/getter.svg" >}}
 
 最后执行的是 `makeCaller(tpl, getters)` ，通过反射机制进行一系列生成实例、赋值属性的操作，然后返回一个 HashMap 对象。
 
@@ -165,7 +166,7 @@ Reflections 类封装了一些反射机制的操作，注意到生成 PojoCompon
 
 HashMap 的类图大致如下：
 
-{{< figure src="/ox-hugo/hashmap.png" >}}
+{{< figure src="/ox-hugo/hashmap.svg" >}}
 
 
 ## 反序列化过程 {#反序列化过程}
