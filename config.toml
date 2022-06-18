@@ -1,8 +1,5 @@
-baseURL = "https://zrquan.github.io/blog"
+baseURL = "https://zrquan.github.io"
 title = "zrquan"
-
-# https://github.com/gohugoio/hugo/issues/8078
-canonifyURLs = true
 
 theme = "fuji"
 hasCJKLanguage = true
@@ -38,7 +35,7 @@ paginate = 10
   subTitle = "每一个平凡的日常，也许就是连续发生的奇迹"
 
   # Source URL of the website, will appear in the footer
-  sourceURL = "https://github.com/zrquan/blog"
+  sourceURL = "https://github.com/zrquan/zrquan.github.io"
 
   # Use CloudFlare Workers to accelerate the Google Analytics
   # If you are using this please comment the googleAnalytics above
