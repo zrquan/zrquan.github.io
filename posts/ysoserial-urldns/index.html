@@ -1,0 +1,108 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=HandheldFriendly content="True"><meta http-equiv=x-ua-compatible content="IE=edge"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=generator content="Hugo 0.101.0"><link rel=apple-touch-icon sizes=180x180 href=https://zrquan.github.io/blog/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://zrquan.github.io/blog/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=https://zrquan.github.io/blog/favicon/favicon-16x16.png><link rel=manifest href=https://zrquan.github.io/blog/favicon/site.webmanifest><link rel=mask-icon href=https://zrquan.github.io/blog/favicon/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"><title>Ysoserial-URLDNS - zrquan</title><meta name=author content="zrquan"><meta name=description content="A minimal Hugo theme with nice theme color."><meta name=keywords content="java,deserialize"><meta property="og:title" content="Ysoserial-URLDNS"><meta name=twitter:title content="Ysoserial-URLDNS"><meta property="og:type" content="article"><meta property="og:url" content="https://zrquan.github.io/blog/posts/ysoserial-urldns/"><meta property="og:description" content><meta name=twitter:description content><meta property="og:image" content="https://zrquan.github.io/img/og.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://zrquan.github.io/img/og.png"><meta property="article:published_time" content="2021-01-28T00:00:00+08:00"><meta property="article:modified_time" content="2021-01-28T00:00:00+08:00"><style>@media(prefers-color-scheme:dark){body[data-theme=auto] img{filter:brightness(60%)}}body[data-theme=dark] img{filter:brightness(60%)}</style><link rel=stylesheet href=https://zrquan.github.io/blog/assets/css/fuji.min.css></head><body data-theme=auto data-theme-auto=false><script data-cfasync=false>var fujiThemeData=localStorage.getItem("fuji_data-theme");fujiThemeData?fujiThemeData!=="auto"&&document.body.setAttribute("data-theme",fujiThemeData==="dark"?"dark":"light"):localStorage.setItem("fuji_data-theme","auto")</script><header><div class="container-lg clearfix"><div class="col-12 header"><a class=title-main href=https://zrquan.github.io/blog>zrquan</a>
+<span class=title-sub>每一个平凡的日常，也许就是连续发生的奇迹</span></div></div></header><main><div class="container-lg clearfix"><div class="col-12 col-md-9 float-left content"><article><h2 class="post-item post-title"><a href=https://zrquan.github.io/blog/posts/ysoserial-urldns/>Ysoserial-URLDNS</a></h2><div class="post-item post-meta"><span><i class="iconfont icon-today-sharp"></i>&nbsp;2021-01-28</span>
+<span><i class="iconfont icon-file-tray-sharp"></i>&nbsp;1277 words</span>
+<span><i class="iconfont icon-pricetags-sharp"></i>&nbsp;<a href=https://zrquan.github.io/blog/tags/java>java</a>&nbsp;<a href=https://zrquan.github.io/blog/tags/deserialize>deserialize</a>&nbsp;</span></div><div class="post-content markdown-body"><p>URLDNS 是一个比较简单的 POP 链，而且只能发送 DNS 请求，不能直接 RCE，所以本来是不想写这篇文章的。不过完整学习了这个链的代码后，发现 ysoserial 的一些代码和技巧对于深入了解 Java 十分有帮助，还是有必要记录一下。</p><h2 id=构造-payload>构造 payload</h2><p>URLDNS 链通过反序列化 HashMap 对象来触发，获取恶意对象的 getObject 方法如下：</p><pre><code class=language-java>public Object getObject(final String url) throws Exception {
+
+    //Avoid DNS resolution during payload creation
+    //Since the field &lt;code&gt;java.net.URL.handler&lt;/code&gt; is transient, it will not be part of the serialized payload.
+    URLStreamHandler handler = new SilentURLStreamHandler();
+
+    HashMap ht = new HashMap(); // HashMap that will contain the URL
+    URL u = new URL(null, url, handler); // URL to use as the Key
+    ht.put(u, url); //The value can be anything that is Serializable, URL as the key is what triggers the DNS lookup.
+
+    //During the put above, the URL's hashCode is calculated and cached. This resets that so the next time hashCode is called a DNS lookup will be triggered.
+    Reflections.setFieldValue(u, &quot;hashCode&quot;, -1);
+
+    return ht;
+}
+</code></pre><p>SilentURLStreamHandler 是一个静态内部类，继承 URLStreamHandler，并重写了 openConnection 和 getHostAddress 方法。</p><pre><code class=language-java>static class SilentURLStreamHandler extends URLStreamHandler {
+
+    protected URLConnection openConnection(URL u) throws IOException {
+        return null;
+    }
+
+    protected synchronized InetAddress getHostAddress(URL u) {
+        return null;
+    }
+}
+</code></pre><p>这个内部类的作用是用来避免漏洞误判，因为 payload 的构造过程中也会触发一次 DNS 请求，而我们希望 DNS 请求只在反序列化的过程中触发，以确定反序列化过程是否存在漏洞。</p><p>那 SilentURLStreamHandler 是怎么阻止第一次 DNS 请求的呢？我们跟进到 <code>ht.put(u, url)</code> 中：</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_17-28-18_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_17-28-18_screenshot.png></figure><p>来到 <code>hashCode()</code> 方法，这里会对 hashCode 变量进行判断，如果不是 <code>-1</code> 的话会直接返回。因为 hashCode 的默认值就是 <code>-1</code> ，所以这里会调用 <code>handler.hashCode(this)</code> 。</p><p>注意此时的 handler 是 SilentURLStreamHandler 的实例。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_17-39-27_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_17-39-27_screenshot.png></figure><p>执行到上图的 359 行，调用 getHostAddress 方法，如果此时的 handler 是 URLStreamHandler 类的实例，则会发起 DNS 请求来获取 IP。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_17-42-20_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_17-42-20_screenshot.png></figure><p>然而此时执行的是 <code>SilentURLStreamHandler.getHostAddress</code> ，直接返回 null，避免了在反序列化前发送 DNS 请求。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_17-46-37_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_17-46-37_screenshot.png></figure><p>执行 <code>ht.put(u, url)</code> 之后，URL 对象的 hashcode 会被修改，前面说过如果 hashCode 不是-1，会在 <code>handler.hashCode(this)</code> 前返回，所以我们要将它重新设成-1。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_17-53-18_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_17-53-18_screenshot.png></figure><p>至此我们构造了一个 HashMap 的实例，并将一个 URL 类的实例设置为它的 key；value 则是我们输入的 url，实际上 value 对利用过程没有影响，只要是能被序列化的类就行。</p><h2 id=反序列化过程>反序列化过程</h2><p>入口点和 <a href=https://zrquan.github.io/blog/posts/ysoserial-hibernate1/>Hibernate1</a> 链一样，在 <code>HashMap.readObject</code> 中。在方法的最后，通过 for 循环获取每个 key 和 value，并调用了 <code>hash()</code> ：</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_18-09-48_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_18-09-48_screenshot.png></figure><p>接下来的执行过程和前面 <code>ht.put(u, url)</code> 差不多，因为前面通过反射机制重置了 hashCode，所以仍然进入到 <code>handler.hashCode()</code> 中。</p><p>和之前一样执行到 getHostAddress 方法，但这次的 handler 并不是 SilentURLStreamHandler 的实例，因此顺利发送 DNS 请求。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_18-13-48_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_18-13-48_screenshot.png></figure><h2 id=transient-关键字>transient 关键字</h2><p>反序列化时，handler 变量并不是 SilentURLStreamHandler 的实例，是因为 <code>URL.handler</code> 变量是用 transient 关键字修饰的。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_19-29-44_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_19-29-44_screenshot.png></figure><p>当序列化一个实现了 Serilizable 接口的类实例时，用 transient 修饰的变量不会被序列化。在实际的开发中，经常会用 transient 修饰一些敏感的数据(密码、证件号等)，避免将这些数据序列化后通过网络传输。</p><p>以下示例代码使用 transient 修饰 User 类的 password 变量，序列化保存到文件后再反序列化获取 User 实例，此时输出的 password 为 null，因为该变量没有被序列化。</p><details><summary>示例代码</summary><p class=details><pre><code class=language-java>public class demo {
+    public static void main(String[] args) {
+        User user = new User();
+        user.setName(&quot;zrquan&quot;);
+        user.setPassword(&quot;qwe123&quot;);
+
+        //序列化
+        try{
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(&quot;user.txt&quot;));
+            os.writeObject(user);
+            os.flush();
+            os.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //反序列化
+        try{
+            ObjectInputStream is = new ObjectInputStream(new FileInputStream(&quot;user.txt&quot;));
+            user = (User) is.readObject();
+            is.close();
+
+            System.out.println(&quot;After deserialized: &quot;);
+            System.out.println(&quot;username: &quot; + user.getName());
+            System.err.println(&quot;password: &quot; + user.getPassword());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class User implements Serializable {
+    public String name;
+    private transient String password;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+</code></pre></p></details><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-01-28_19-58-25_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-01-28_19-58-25_screenshot.png></figure><p>💡 使用 transient 要注意以下几点：</p><ol><li>被修饰的变量将不再是对象持久化的一部分，该变量的值在序列化后无法获取。</li><li>只能修饰变量，不能修饰方法和类。且本地变量不能被修饰，只能修饰实现了 Serializable 接口的类的成员变量。</li><li>静态变量不管是否被 transient 修饰，都不能被序列化。</li><li>transient 用来避免实现了 Serilizable 接口的类的变量被序列化，对实现 Externalizable 接口的类没有影响。</li></ol></div></article><div class="license markdown-body"><blockquote><p>Unless otherwise noted, the content of this site is licensed under <a rel=license href=http://creativecommons.org/licenses/by-nc-sa/4.0/ target=_blank>CC BY-NC-SA 4.0</a>.</p></blockquote></div><div class=post-comment data-comment=disqus><span class=post-comment-notloaded><i class="iconfont icon-chatbox-ellipses-sharp"></i>&nbsp;Load comments</span><div id=disqus_thread style=display:none></div><script>function loadComment(){var t=document.querySelector(".post-comment"),n=function(){this.page.url="https://zrquan.github.io/blog/posts/ysoserial-urldns/",this.page.identifier="ysoserial-urldns"},e=document.createElement("script");e.src="https://4shen0ne.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),document.querySelector("#disqus_thread").removeAttribute("style"),(document.body||document.head).appendChild(e),document.querySelector("span.post-comment-notloaded").setAttribute("style","display: none;")}</script></div></div><aside class="col-12 col-md-3 float-left sidebar"><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=https://zrquan.github.io/blog/>Home</a></li><li><a href=https://zrquan.github.io/blog/archives/>Archives</a></li><li><a href=https://zrquan.github.io/blog/search/>Search</a></li><li><a href=https://zrquan.github.io/blog/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=https://zrquan.github.io/blog/tags/cve/>cve</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/deserialize/>deserialize</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/emacs/>emacs</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/fastjson/>fastjson</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/java/>java</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/kotlin/>kotlin</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/org-mode/>org-mode</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/web/>web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#构造-payload>构造 payload</a></li><li><a href=#反序列化过程>反序列化过程</a></li><li><a href=#transient-关键字>transient 关键字</a></li></ul></nav></div></aside></div><div class=btn><div class=btn-menu id=btn-menu><i class="iconfont icon-grid-sharp"></i></div><div class=btn-toggle-mode><i class="iconfont icon-contrast-sharp"></i></div><div class=btn-scroll-top><i class="iconfont icon-chevron-up-circle-sharp"></i></div></div><aside class=sidebar-mobile style=display:none><div class=sidebar-wrapper><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=https://zrquan.github.io/blog/>Home</a></li><li><a href=https://zrquan.github.io/blog/archives/>Archives</a></li><li><a href=https://zrquan.github.io/blog/search/>Search</a></li><li><a href=https://zrquan.github.io/blog/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=https://zrquan.github.io/blog/tags/cve/>cve</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/deserialize/>deserialize</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/emacs/>emacs</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/fastjson/>fastjson</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/java/>java</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/kotlin/>kotlin</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/org-mode/>org-mode</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/web/>web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#构造-payload>构造 payload</a></li><li><a href=#反序列化过程>反序列化过程</a></li><li><a href=#transient-关键字>transient 关键字</a></li></ul></nav></div></div></aside></main><footer><div class="container-lg clearfix"><div class="col-12 footer"><span>&copy; 2021-2022
+<a href=https://zrquan.github.io/blog>zrquan</a>
+| <a href=https://github.com/zrquan/blog>Source code</a>
+| Powered by <a href=https://github.com/dsrkafuu/hugo-theme-fuji/ target=_blank>Fuji-v2</a> & <a href=https://gohugo.io/ target=_blank>Hugo</a></span></div></div></footer><script defer src=https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/lazysizes@5.3.0/lazysizes.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/components/prism-core.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js></script>
+<script defer src=https://zrquan.github.io/blog/assets/js/fuji.min.js></script>
+<script async src=https://unpkg.com/mermaid@8.2.3/dist/mermaid.min.js></script></body></html>

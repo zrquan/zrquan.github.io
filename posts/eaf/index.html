@@ -1,0 +1,74 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=HandheldFriendly content="True"><meta http-equiv=x-ua-compatible content="IE=edge"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=generator content="Hugo 0.101.0"><link rel=apple-touch-icon sizes=180x180 href=https://zrquan.github.io/blog/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://zrquan.github.io/blog/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=https://zrquan.github.io/blog/favicon/favicon-16x16.png><link rel=manifest href=https://zrquan.github.io/blog/favicon/site.webmanifest><link rel=mask-icon href=https://zrquan.github.io/blog/favicon/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"><title>Emacs Application Framework - zrquan</title><meta name=author content="zrquan"><meta name=description content="A minimal Hugo theme with nice theme color."><meta name=keywords content="emacs"><meta property="og:title" content="Emacs Application Framework"><meta name=twitter:title content="Emacs Application Framework"><meta property="og:type" content="article"><meta property="og:url" content="https://zrquan.github.io/blog/posts/eaf/"><meta property="og:description" content><meta name=twitter:description content><meta property="og:image" content="https://zrquan.github.io/img/og.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://zrquan.github.io/img/og.png"><meta property="article:published_time" content="2021-04-02T00:00:00+08:00"><meta property="article:modified_time" content="2021-04-02T00:00:00+08:00"><style>@media(prefers-color-scheme:dark){body[data-theme=auto] img{filter:brightness(60%)}}body[data-theme=dark] img{filter:brightness(60%)}</style><link rel=stylesheet href=https://zrquan.github.io/blog/assets/css/fuji.min.css></head><body data-theme=auto data-theme-auto=false><script data-cfasync=false>var fujiThemeData=localStorage.getItem("fuji_data-theme");fujiThemeData?fujiThemeData!=="auto"&&document.body.setAttribute("data-theme",fujiThemeData==="dark"?"dark":"light"):localStorage.setItem("fuji_data-theme","auto")</script><header><div class="container-lg clearfix"><div class="col-12 header"><a class=title-main href=https://zrquan.github.io/blog>zrquan</a>
+<span class=title-sub>每一个平凡的日常，也许就是连续发生的奇迹</span></div></div></header><main><div class="container-lg clearfix"><div class="col-12 col-md-9 float-left content"><article><h2 class="post-item post-title"><a href=https://zrquan.github.io/blog/posts/eaf/>Emacs Application Framework</a></h2><div class="post-item post-meta"><span><i class="iconfont icon-today-sharp"></i>&nbsp;2021-04-02</span>
+<span><i class="iconfont icon-file-tray-sharp"></i>&nbsp;789 words</span>
+<span><i class="iconfont icon-pricetags-sharp"></i>&nbsp;<a href=https://zrquan.github.io/blog/tags/emacs>emacs</a>&nbsp;</span></div><div class="post-content markdown-body"><h2 id=what>What</h2><p>EAF 是 <a href=https://manateelazycat.github.io/ target=_blank>ManateeLazyCat</a> 开发的 Emacs 图形应用框架，通过 PyQt 框架来开发图形应用并将其固定在 Emacs 窗口的合适位置，Emacs 和 Python 进程则通过 IPC 进行通信，达到像操作 Emacs 原生 buffer 和 window 一样操作图形应用的效果。</p><p>EAF 使用 QGraphicsScene 和 QGraphicsView 来模拟 Emacs 中的 buffer 和 window，
+QGraphicsScene 管理应用的内容、处理键鼠事件，生命周期和 buffer 相同；QGraphicsView
+展示图形界面、监听鼠标事件，生命周期和 window 相同，再通过 <code>QWindow::setParent</code> 技术将它固定在 Emacs 上。而键盘事件则由 Emacs 接收，通过 EPC 发送给 QGraphicsScene。<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup></p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-02_15-10-55_framework.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-02_15-10-55_framework.png></figure><p>Homepage: <a href=https://github.com/manateelazycat/emacs-application-framework target=_blank>https://github.com/manateelazycat/emacs-application-framework</a></p><h2 id=why>Why</h2><p>不记得之前在哪里看到一句话——Emacs 最大的缺点就是你不得不离开 Emacs。</p><p>之前写文章做笔记时，都要一个半屏打开浏览器或者 PDF，一个半屏放 Emacs。现在可以直接在 Emacs 打开浏览器，用来预览本地博客真的很爽。</p><figure><img src=https://zrquan.github.io/blog/ox-hugo/2021-04-02_16-00-39_screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/2021-04-02_16-00-39_screenshot.png></figure><p>当然，EAF 的应用比起那些成熟的软件还是有很大差距的，功能也比较简单，不必非要用它来取代其他软件。我个人对 Live in Emacs 是没啥执念的，哪个用着爽就用哪个😁</p><h2 id=how>How</h2><p>EAF 的安装很简单(只要不遇到奇奇怪怪的 bug)，github 主页给了详细的过程，下面我写一下我在 Windows10 & Spacemacs 环境下的安装过程。</p><p>① 下载 EAF</p><pre><code class=language-text>git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/private/local/emacs-application-framework/
+</code></pre><p>② 安装 python 依赖</p><pre><code class=language-text>cd ~/.emacs.d/private/local/emacs-application-framework/
+node install-eaf-win32.js
+</code></pre><p>如果安装有问题先检查一下 pip 能不能访问到服务器，连接超时的话一般是代理的锅。</p><p>脚本最后会下载一个视频解码器 K-Lite Codec Pack，如果不打算用 Emacs 看视频就可以
+<code>Ctrl-C</code> 了。</p><p>③ 安装 Elisp 依赖</p><p>下载安装 emacs-ctable、emacs-deferred、emacs-epc，不过新版 Emacs 好像作为依赖安装好了，反正我是跳过了这一步。</p><p>④ 添加配置</p><pre><code class=language-emacs-lisp>(add-to-list 'load-path &quot;~/.emacs.d/private/local/emacs-application-framework/&quot;)
+(require 'eaf)
+</code></pre><details><summary>我的配置，以后能想起来就更新一下。</summary><p class=details><pre><code class=language-emacs-lisp>;; EAF
+(use-package eaf
+  :load-path &quot;~/.emacs.d/private/local/emacs-application-framework&quot; ; Set to &quot;/usr/share/emacs/site-lisp/eaf&quot; if installed from AUR
+  :init
+  (use-package epc :defer t :ensure t)
+  (use-package ctable :defer t :ensure t)
+  (use-package deferred :defer t :ensure t)
+  (use-package s :defer t :ensure t)
+  :custom
+  (eaf-browser-continue-where-left-off t)
+  :config
+  (setq eaf-fullscreen-p t)
+  (eaf-setq eaf-browser-enable-adblocker &quot;true&quot;)
+  (eaf-setq eaf-browser-dark-mode &quot;false&quot;)
+  (setq browse-url-browser-function 'eaf-open-browser)
+  (defalias 'browse-web #'eaf-open-browser)
+  (eaf-bind-key nil &quot;M-q&quot; eaf-browser-keybinding)) ;; unbind, see more in the Wiki
+
+;; eaf-evil
+(require 'eaf-evil)
+(setq eaf-evil-leader-keymap  spacemacs-cmds)
+(define-key key-translation-map (kbd &quot;SPC&quot;)
+  (lambda (prompt)
+    (if (derived-mode-p 'eaf-mode)
+        (pcase eaf--buffer-app-name
+          (&quot;browser&quot; (if (string= (eaf-call-sync &quot;call_function&quot; eaf--buffer-id &quot;is_focus&quot;) &quot;True&quot;)
+                         (kbd &quot;SPC&quot;)
+                       (kbd eaf-evil-leader-key)))
+          (&quot;pdf-viewer&quot; (kbd eaf-evil-leader-key))
+          (&quot;image-viewer&quot; (kbd eaf-evil-leader-key))
+          (_  (kbd &quot;SPC&quot;)))
+      (kbd &quot;SPC&quot;))))
+
+;; eaf-org
+(require 'eaf-org)
+(defun eaf-org-open-file (file &amp;optional link)
+  &quot;An wrapper function on `eaf-open'.&quot;
+  (eaf-open file))
+;; use `emacs-application-framework' to open PDF file: link
+(add-to-list 'org-file-apps '(&quot;\\.pdf\\'&quot; . eaf-org-open-file))
+</code></pre></p></details><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p><a href=https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking target=_blank>https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div></article><div class="license markdown-body"><blockquote><p>Unless otherwise noted, the content of this site is licensed under <a rel=license href=http://creativecommons.org/licenses/by-nc-sa/4.0/ target=_blank>CC BY-NC-SA 4.0</a>.</p></blockquote></div><div class=post-comment data-comment=disqus><span class=post-comment-notloaded><i class="iconfont icon-chatbox-ellipses-sharp"></i>&nbsp;Load comments</span><div id=disqus_thread style=display:none></div><script>function loadComment(){var t=document.querySelector(".post-comment"),n=function(){this.page.url="https://zrquan.github.io/blog/posts/eaf/",this.page.identifier="eaf"},e=document.createElement("script");e.src="https://4shen0ne.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),document.querySelector("#disqus_thread").removeAttribute("style"),(document.body||document.head).appendChild(e),document.querySelector("span.post-comment-notloaded").setAttribute("style","display: none;")}</script></div></div><aside class="col-12 col-md-3 float-left sidebar"><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=https://zrquan.github.io/blog/>Home</a></li><li><a href=https://zrquan.github.io/blog/archives/>Archives</a></li><li><a href=https://zrquan.github.io/blog/search/>Search</a></li><li><a href=https://zrquan.github.io/blog/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=https://zrquan.github.io/blog/tags/cve/>cve</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/deserialize/>deserialize</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/emacs/>emacs</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/fastjson/>fastjson</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/java/>java</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/kotlin/>kotlin</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/org-mode/>org-mode</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/web/>web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#what>What</a></li><li><a href=#why>Why</a></li><li><a href=#how>How</a></li></ul></nav></div></aside></div><div class=btn><div class=btn-menu id=btn-menu><i class="iconfont icon-grid-sharp"></i></div><div class=btn-toggle-mode><i class="iconfont icon-contrast-sharp"></i></div><div class=btn-scroll-top><i class="iconfont icon-chevron-up-circle-sharp"></i></div></div><aside class=sidebar-mobile style=display:none><div class=sidebar-wrapper><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=https://zrquan.github.io/blog/>Home</a></li><li><a href=https://zrquan.github.io/blog/archives/>Archives</a></li><li><a href=https://zrquan.github.io/blog/search/>Search</a></li><li><a href=https://zrquan.github.io/blog/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=https://zrquan.github.io/blog/tags/cve/>cve</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/deserialize/>deserialize</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/emacs/>emacs</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/fastjson/>fastjson</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/java/>java</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/kotlin/>kotlin</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/org-mode/>org-mode</a></span>
+<span><a href=https://zrquan.github.io/blog/tags/web/>web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#what>What</a></li><li><a href=#why>Why</a></li><li><a href=#how>How</a></li></ul></nav></div></div></aside></main><footer><div class="container-lg clearfix"><div class="col-12 footer"><span>&copy; 2021-2022
+<a href=https://zrquan.github.io/blog>zrquan</a>
+| <a href=https://github.com/zrquan/blog>Source code</a>
+| Powered by <a href=https://github.com/dsrkafuu/hugo-theme-fuji/ target=_blank>Fuji-v2</a> & <a href=https://gohugo.io/ target=_blank>Hugo</a></span></div></div></footer><script defer src=https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/lazysizes@5.3.0/lazysizes.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/components/prism-core.min.js></script>
+<script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js></script>
+<script defer src=https://zrquan.github.io/blog/assets/js/fuji.min.js></script>
+<script async src=https://unpkg.com/mermaid@8.2.3/dist/mermaid.min.js></script></body></html>
