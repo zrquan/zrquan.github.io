@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>emacs on zrquan</title><link>https://zrquan.github.io/tags/emacs/</link><description>Recent content in emacs on zrquan</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Fri, 02 Apr 2021 00:00:00 +0800</lastBuildDate><atom:link href="https://zrquan.github.io/tags/emacs/index.xml" rel="self" type="application/rss+xml"/><item><title>Emacs Application Framework</title><link>https://zrquan.github.io/posts/eaf/</link><pubDate>Fri, 02 Apr 2021 00:00:00 +0800</pubDate><guid>https://zrquan.github.io/posts/eaf/</guid><description/></item><item><title>My life in plain text</title><link>https://zrquan.github.io/posts/org-mode/</link><pubDate>Sat, 09 Jan 2021 00:00:00 +0800</pubDate><guid>https://zrquan.github.io/posts/org-mode/</guid><description>&lt;figure>
-&lt;img src="https://zrquan.github.io/ox-hugo/org-cover.png"
-class="img-zoomable medium-zoom-image"
-alt="/ox-hugo/org-cover.png"/>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Emacs on zrquan</title><link>https://zrquan.github.io/tags/emacs/</link><description>Recent content in Emacs on zrquan</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 02 Apr 2021 00:00:00 +0800</lastBuildDate><atom:link href="https://zrquan.github.io/tags/emacs/index.xml" rel="self" type="application/rss+xml"/><item><title>Emacs Application Framework</title><link>https://zrquan.github.io/posts/eaf/</link><pubDate>Fri, 02 Apr 2021 00:00:00 +0800</pubDate><guid>https://zrquan.github.io/posts/eaf/</guid><description/></item><item><title>My life in plain text</title><link>https://zrquan.github.io/posts/org-mode/</link><pubDate>Sat, 09 Jan 2021 00:00:00 +0800</pubDate><guid>https://zrquan.github.io/posts/org-mode/</guid><description>&lt;figure>
+ 
+ &lt;img src="https://zrquan.github.io/ox-hugo/org-cover.png"
+ class="img-zoomable medium-zoom-image"
+ alt="/ox-hugo/org-cover.png"/>
+ 
+ 
 &lt;/figure></description></item></channel></rss>
