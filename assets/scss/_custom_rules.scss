@@ -1,35 +1,41 @@
 // 此文件最后加载，用于自定义样式，覆盖主题的默认设置
 
 figure {
-    margin: 0;
+  margin: 0;
 }
 
 body[data-theme='dark'] img {
-    filter: brightness(80%);
+  filter: brightness(80%);
+}
+
+.src-block-caption {
+  position: relative;
+  top: -15px;
+  font-size: smaller;
 }
 
 // 中文字体
 @font-face {
-    font-family: jinkaiFont;
-    src: url("../../fonts/jinkai.ttf") format("TrueType");
+  font-family: jinkaiFont;
+  src: url("../../fonts/jinkai.ttf") format("TrueType");
 }
 
 // 英文字体
 @font-face {
-    font-family: Josefin sans;
-    src: url("../../fonts/JosefinSans-SemiBold.ttf") format("TrueType");
+  font-family: Josefin sans;
+  src: url("../../fonts/JosefinSans-SemiBold.ttf") format("TrueType");
 }
 
 // 博客标题
 @font-face {
-    font-family: Bradley Hand ITC;
-    src: url("../../fonts/bradhitc.ttf") format("TrueType");
+  font-family: Bradley Hand ITC;
+  src: url("../../fonts/bradhitc.ttf") format("TrueType");
 }
 
 // 等宽字体(代码)
 @font-face {
-    font-family: Fira Code;
-    src: url("../../fonts/FiraCode-Regular.ttf") format("TrueType");
+  font-family: Fira Code;
+  src: url("../../fonts/FiraCode-Regular.ttf") format("TrueType");
 }
 
 /* custom prism theme */
