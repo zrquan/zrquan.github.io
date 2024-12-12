@@ -139,10 +139,10 @@ summaryLength = 100 # Custom summary length, add <!--more--> in post file to cus
     name = "GitHub"
     url = "https://github.com/zrquan"
     weight = 1
-  #[[menu.link]]
-  #  name = "Zhihu"
-  #  url = "https://www.zhihu.com/people/4shenone"
-  #  weight = 2
+  [[menu.link]]
+   name = "Notes"
+   url = "https://notes-bice-five.vercel.app/"
+   weight = 2
   #[[menu.link]]
   #  name = "bilibili"
   #  url = "https://space.bilibili.com/19767474"
