@@ -2,7 +2,7 @@
 title = "Hessian Deserialization"
 author = ["4shen0ne"]
 publishDate = 2024-12-18T00:00:00+08:00
-tags = ["hessian", "deserialize"]
+tags = ["java", "deserialize", "hessian"]
 draft = false
 +++
 
@@ -92,8 +92,7 @@ c..m..sayHelloS..clientz
 
 ### 示例：SpringBoot {#示例-springboot}
 
-在 SpringBoot 中可以用 `org.springframework.remoting.caucho.HessianServiceExporter` 来注册服务，注意
-remoting 模块在最新版本中默认是不提供的，建议使用低版本进行测试
+在 SpringBoot 中可以用 `org.springframework.remoting.caucho.HessianServiceExporter` 来注册服务，注意 remoting 模块在最新版本中默认是不提供的，建议使用低版本进行测试
 
 通过注解进行配置还是比较简单的，demo 代码可以参考[这里](https://github.com/eugenp/tutorials/tree/master/spring-remoting-modules/remoting-hessian-burlap)
 
@@ -139,7 +138,7 @@ HessianServlet 是 HTTPServlet 的子类，所以我们重点关注两个方法�
 service 方法是整个 RPC 处理过程的入口点，我们从这里开始探索 Hessian 的服务调用实现逻辑
 
 1.  首先会检查是不是 POST 请求，如果不是的话会直接返回 500 错误码
-2.  接着用 ServiceContext 类保存一些上下文对象（request、response 等等）
+2.  接着用 ServiceContext 类保存一些上下文对象（ request 、response 等等）
 3.  初始化序列化工厂对象 SerializerFactory
 4.  再进入 `com.caucho.hessian.server.HessianSkeleton#invoke(InputStream, OutputStream,
        SerializerFactory)` 方法
@@ -253,8 +252,7 @@ default:
 
 ### 协议版本 {#协议版本}
 
-我们现在知道，即使 Hessian 协议已经迭代到 2.0 版本，仍然可以和 1.0 版本混用，默认情况下使用
-CALL_1_REPLY_2，即客户端发送 1.0 协议数据，服务端返回 2.0 协议数据
+我们现在知道，即使 Hessian 协议已经迭代到 2.0 版本，仍然可以和 1.0 版本混用，默认情况下使用 CALL_1_REPLY_2，即客户端发送 1.0 协议数据，服务端返回 2.0 协议数据
 
 {{< figure src="/ox-hugo/_20241212_152518screenshot.png" >}}
 
@@ -314,8 +312,7 @@ public void writeObject(Object object)
 </div>
 </details>
 
-在开始进行数据序列化时，会调用 `com.caucho.hessian.io.AbstractHessianOutput#writeObjectBegin` ，在 1.0
-版本时会把所有数据都写在一个 Map 容器里面，Hessian2Output 则重写了该方法，根据类型写入其描述信息
+在开始进行数据序列化时，会调用 `com.caucho.hessian.io.AbstractHessianOutput#writeObjectBegin` ，在 1.0 版本时会把所有数据都写在一个 Map 容器里面，Hessian2Output 则重写了该方法，根据类型写入其描述信息
 
 ```java
 /**
@@ -361,10 +358,7 @@ if (Modifier.isTransient(field.getModifiers())
 
 ## 反序列化过程 {#反序列化过程}
 
-反序列化过程和 AbstractHessianInput 的子类密切相关，入口方法和原生反序列化一样（名字一样）都是
-readObject，以 HessianInput 为例，在 readObject 方法中会根据 tag 判断数据的类型，然后使用对应的
-Deserializer 去处理。由于 Hessian1.0 会把序列化数据都放在一个 Map 中，所以会像下图一样通过 readMap
-处理：
+反序列化过程和 AbstractHessianInput 的子类密切相关，入口方法和原生反序列化一样（名字一样）都是 readObject，以 HessianInput 为例，在 readObject 方法中会根据 tag 判断数据的类型，然后使用对应的 Deserializer 去处理。由于 Hessian1.0 会把序列化数据都放在一个 Map 中，所以会像下图一样通过 readMap 处理：
 
 {{< figure src="/ox-hugo/_20241211_155749screenshot.png" >}}
 
@@ -406,8 +400,7 @@ public Object readMap(AbstractHessianInput in)
 
 众所周知，HashMap 在执行 put 操作时会调用 key 的 hashCode 和 equals 方法，这在很多现有的链中被利用到；而 TreeMap 在执行 put 操作时也会调用 key 的 compareTo 方法
 
-如果是 Hessian2.0 的序列化数据，数据流的 tag 是 `C` ，最后会根据类型描述信息由
-`sun.misc.Unsafe#allocateInstance` 方法进行反序列化对象的初始化，这个方法是一个 native 方法，没有办法进行利用
+如果是 Hessian2.0 的序列化数据，数据流的 tag 是 `C` ，最后会根据类型描述信息由 `sun.misc.Unsafe#allocateInstance` 方法进行反序列化对象的初始化，这个方法是一个 native 方法，没有办法进行利用
 
 ```text
 instantiate:306, UnsafeDeserializer (com.caucho.hessian.io)
@@ -434,8 +427,7 @@ service:379, HessianServlet (com.caucho.hessian.server)
 
 ### Rome {#rome}
 
-Rome 是一个用于 RSS 和 Atom 订阅的 Java 框架，在 marshalsec 中就用它的 ToStringBean 和 EqualsBean
-等类构造出了 Hessian 利用链
+Rome 是一个用于 RSS 和 Atom 订阅的 Java 框架，在 marshalsec 中就用它的 ToStringBean 和 EqualsBean 等类构造出了 Hessian 利用链
 
 EqualsBean 在 hashCode 中可以执行任意对象的 toString 方法
 
@@ -451,8 +443,7 @@ public class EqualsBean implements Serializable {
 }
 ```
 
-而 `ToStringBean#toString` 可以调用他封装类的全部无参 getter 方法，那么可以用
-`JdbcRowSetImpl#getDatabaseMetaData` 进行 JNDI 注入
+而 `ToStringBean#toString` 可以调用他封装类的全部无参 getter 方法，那么可以用 `JdbcRowSetImpl#getDatabaseMetaData` 进行 JNDI 注入
 
 {{< figure src="/ox-hugo/_20241211_162700screenshot.png" >}}
 
@@ -594,8 +585,7 @@ Rdn$RdnEntry#compareTo->
               InitialContext#doLookup()
 ```
 
-由于 MultiUIDefaults 不是 public 类，这个 gadget 无法复用到 Hessian 中，我们还需要找到一个入口触发
-`UIDefaults#get`
+由于 MultiUIDefaults 不是 public 类，这个 gadget 无法复用到 Hessian 中，我们还需要找到一个入口触发 `UIDefaults#get`
 
 找到代替品 `javax.activation.MimeTypeParameterList#toString` ，它会执行 parameters 成员变量的 get 方法
 
@@ -617,11 +607,9 @@ public String toString() {
 }
 ```
 
-至于 toString 方法，可以利用 `Hessian2Input#expect` 触发，这是一个用来打印类型错误信息的方法，Hessian
-在反序列化时需要从数据流读取标志字节（tag）来判断接下来的数据是什么类型，以此来保证使用正确的方法还原对象，比如之前我们看到过 M 代表 Map 类型的对象，会调用 readMap 方法处理
+至于 toString 方法，可以利用 `Hessian2Input#expect` 触发，这是一个用来打印类型错误信息的方法，Hessian 在反序列化时需要从数据流读取标志字节（ tag ）来判断接下来的数据是什么类型，以此来保证使用正确的方法还原对象，比如之前我们看到过 M 代表 Map 类型的对象，会调用 readMap 方法处理
 
-当读取到的 tag 和预期不符时，会调用 `Hessian2Input#expect` 来输出错误信息，这时会将剩下的数据用
-readObject 方法进行反序列化，然后和字符串拼接生成错误信息，这时候会隐式执行对象的 toString 方法
+当读取到的 tag 和预期不符时，会调用 `Hessian2Input#expect` 来输出错误信息，这时会将剩下的数据用 readObject 方法进行反序列化，然后和字符串拼接生成错误信息，这时候会隐式执行对象的 toString 方法
 
 ```java
 Object obj = readObject();
@@ -682,8 +670,7 @@ readObject:2122, Hessian2Input (com.caucho.hessian.io)
 
 #### 不出网利用 {#不出网利用}
 
-通过反射调用任意方法可以做到 RCE，但在无法出网的情境下，单纯的 RCE 也难以有效利用。如果可以借助
-[`SwingLazyValue#createValue`](#code-snippet--SwingLazyValue) 初始化任意类，那么就可以写入内存马
+通过反射调用任意方法可以做到 RCE，但在无法出网的情境下，单纯的 RCE 也难以有效利用。如果可以借助 [`SwingLazyValue#createValue`](#code-snippet--SwingLazyValue) 初始化任意类，那么就可以写入内存马
 
 <!--list-separator-->
 
@@ -749,8 +736,7 @@ readObject:2122, Hessian2Input (com.caucho.hessian.io)
 
     XSLT 是一种样式转换标记语言，可以将 XML 文档转换成其他格式，比如 HTML。XSLT 包含了超过 100 个内置函数, 这些函数可以用于字符串、数值、日期和时间比较、节点和 QName 处理, 序列处理, 逻辑判断等等
 
-    我们可以将 XSLT 想象成模板引擎，在利用 SSTI 时我们通常需要用模板语言定义多个中间变量去构造完整的
-    payload，XSLT 也提供了定义变量的元素 variable
+    我们可以将 XSLT 想象成模板引擎，在利用 SSTI 时我们通常需要用模板语言定义多个中间变量去构造完整的 payload，XSLT 也提供了定义变量的元素 variable
 
     ```xml
     <xsl:variable
@@ -799,8 +785,7 @@ readObject:2122, Hessian2Input (com.caucho.hessian.io)
     </xsl:stylesheet>
     ```
 
-    结合 [`SwingLazyValue#createValue`](#code-snippet--SwingLazyValue) 的反射调用利用点，可以使用
-    `com.sun.org.apache.xalan.internal.xslt.Process#_main` 加载执行恶意 XSLT 代码，但是需要通过文件路径来加载，所以需要先写到文件中
+    结合 [`SwingLazyValue#createValue`](#code-snippet--SwingLazyValue) 的反射调用利用点，可以使用 `com.sun.org.apache.xalan.internal.xslt.Process#_main` 加载执行恶意 XSLT 代码，但是需要通过文件路径来加载，所以需要先写到文件中
 
     {{< figure src="/ox-hugo/_20241217_162115screenshot.png" >}}
 

@@ -52,8 +52,7 @@ draft = false
                                                                   Medium
 ```
 
-这个叫 Hmohgnsyc.exe 的程序放在 ToDesk 的目录里，查看该程序的信息
-dmp/name/Hmohgnsyc.exe-10504/modules/Hmohgnsyc.exe/versioninfo.txt:
+这个叫 Hmohgnsyc.exe 的程序放在 ToDesk 的目录里，查看该程序的信息 dmp/name/Hmohgnsyc.exe-10504/modules/Hmohgnsyc.exe/versioninfo.txt:
 
 ```text
 Company Name:      http://www.jieba.net
@@ -430,8 +429,7 @@ gcc -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -fPIC -shared NativeCall.c -
 
 {{< figure src="/ox-hugo/_20241207_121225screenshot.png" >}}
 
-起手 binwalk+foremost 拿到藏在图片里的压缩包，压缩包用了伪加密，用 010Editor 搜
-deFlags 将所有 9 改成 0 即可解压得到一堆 txt 文件
+起手 binwalk+foremost 拿到藏在图片里的压缩包，压缩包用了伪加密，用 010Editor 搜 deFlags 将所有 9 改成 0 即可解压得到一堆 txt 文件
 
 ```shell
 ❯ eza -l --time-style full-iso
@@ -456,8 +454,7 @@ deFlags 将所有 9 改成 0 即可解压得到一堆 txt 文件
 
 {{< figure src="/ox-hugo/_20241207_125343screenshot.png" >}}
 
-从末尾的一堆空白字符可以想到 [SNOW 隐写](https://darkside.com.au/snow/)，而且题目提示了图片中陈桂林的台词是某个
-key，那么把台词作为 password 用 SNOW 解密 flag.txt 就可以拿到前半个 flag
+从末尾的一堆空白字符可以想到 [SNOW 隐写](https://darkside.com.au/snow/)，而且题目提示了图片中陈桂林的台词是某个 key，那么把台词作为 password 用 SNOW 解密 flag.txt 就可以拿到前半个 flag
 
 {{< figure src="/ox-hugo/_20241207_125802screenshot.png" >}}
 
@@ -490,8 +487,7 @@ print(result)
 # key:ctfSh0w
 ```
 
-又拿到一个 key，用在哪里呢？原来最初的 flag.png 中还藏了东西，下图中 `9E97BA2A` 是
-OurSecret 加密的特征。OurSecret 是一个文档加密工具，可以将一些私密文件隐藏在其他文件里，需要通过密码来提取，也就是这个 key
+又拿到一个 key，用在哪里呢？原来最初的 flag.png 中还藏了东西，下图中 `9E97BA2A` 是 OurSecret 加密的特征。OurSecret 是一个文档加密工具，可以将一些私密文件隐藏在其他文件里，需要通过密码来提取，也就是这个 key
 
 {{< figure src="/ox-hugo/_20241207_140211screenshot.png" >}}
 
