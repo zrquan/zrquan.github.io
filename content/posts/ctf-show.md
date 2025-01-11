@@ -764,7 +764,7 @@ class Remote:
 ```
 
 
-### <span class="org-todo todo TODO">TODO</span> NewerFileDetector {#newerfiledetector}
+### [TODO] NewerFileDetector {#newerfiledetector}
 
 > Magika 是谷歌推出的一款新型 AI 文件类型检测工具，据说 Magika 的准确率和召回率达到 99% 以上。看 来开发再也不需要担心文件上传漏洞了。
 
